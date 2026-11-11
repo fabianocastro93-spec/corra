@@ -32,7 +32,15 @@ Um jogo de sobrevivência 2D em uma arena plana com barreiras e abrigos defensiv
 ---
 
 ## 🕹️ Controles
+ 
+### 📱 No Celular / Dispositivos Móveis
+- **Botões `◀` e `▶` (Canto inferior esquerdo)**: Movimentar o personagem.
+- **Botão `▲ PULO` (Canto inferior direito, verde)**: Pular para alcançar abrigos ou esquivar de tremores.
+- **Botão `⚡ DASH` (Canto inferior direito, dourado)**: Esquiva rápida com invulnerabilidade momentânea.
+- **Toque na Tela**: Desbloqueia o som nativo no primeiro toque e permite digitar com o teclado virtual.
+- **Multi-Touch Completo**: Você pode segurar para correr e apertar o pulo ao mesmo tempo com os dois polegares!
 
+### 💻 No Computador
 | Ação | Teclas |
 | :--- | :--- |
 | **Mover para Esquerda / Direita** | `A` / `D` ou `←` / `→` |

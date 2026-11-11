@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Arena Sobrevivência 2D - O Escolhido</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -97,6 +97,26 @@
                         🔄 JOGAR NOVAMENTE
                     </button>
                 </div>
+            <!-- CONTROLES VIRTUAIS TOUCH PARA CELULAR -->
+            <div id="touchGamepad" class="touch-gamepad">
+                <div class="touch-dpad">
+                    <button id="btnTouchLeft" class="touch-btn" aria-label="Mover Esquerda">
+                        <span>◀</span>
+                    </button>
+                    <button id="btnTouchRight" class="touch-btn" aria-label="Mover Direita">
+                        <span>▶</span>
+                    </button>
+                </div>
+                <div class="touch-actions">
+                    <button id="btnTouchDash" class="touch-btn touch-btn-dash" aria-label="Esquiva">
+                        <span>⚡</span>
+                        <small>DASH</small>
+                    </button>
+                    <button id="btnTouchJump" class="touch-btn touch-btn-jump" aria-label="Pular">
+                        <span>▲</span>
+                        <small>PULO</small>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -189,6 +209,88 @@
                 btn.textContent = sounds.enabled ? '🔊 ÁUDIO: LIGADO' : '🔇 ÁUDIO: MUTADO';
             }
         }
+
+        // ================= CONFIGURAÇÃO DO GAMEPAD TOUCH (MOBILE) =================
+        function setupTouchControls() {
+            const btnLeft = document.getElementById('btnTouchLeft');
+            const btnRight = document.getElementById('btnTouchRight');
+            const btnJump = document.getElementById('btnTouchJump');
+            const btnDash = document.getElementById('btnTouchDash');
+
+            // Desbloqueia contexto de áudio no primeiro toque na tela (iOS/Android)
+            window.addEventListener('touchstart', () => {
+                if (typeof sounds !== 'undefined') sounds.ensureContext();
+            }, { passive: true, once: true });
+
+            function bindButton(element, onDown, onUp) {
+                if (!element) return;
+
+                element.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (typeof sounds !== 'undefined') sounds.ensureContext();
+                    element.classList.add('active');
+                    onDown();
+                }, { passive: false });
+
+                element.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    element.classList.remove('active');
+                    if (onUp) onUp();
+                }, { passive: false });
+
+                element.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    element.classList.remove('active');
+                    if (onUp) onUp();
+                }, { passive: false });
+
+                // Suporte para testar com clique do mouse também
+                element.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    element.classList.add('active');
+                    onDown();
+                });
+                element.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    element.classList.remove('active');
+                    if (onUp) onUp();
+                });
+                element.addEventListener('mouseleave', () => {
+                    element.classList.remove('active');
+                    if (onUp) onUp();
+                });
+            }
+
+            // Movimento para Esquerda
+            bindButton(btnLeft, () => {
+                if (window.game) window.game.keys['ArrowLeft'] = true;
+            }, () => {
+                if (window.game) window.game.keys['ArrowLeft'] = false;
+            });
+
+            // Movimento para Direita
+            bindButton(btnRight, () => {
+                if (window.game) window.game.keys['ArrowRight'] = true;
+            }, () => {
+                if (window.game) window.game.keys['ArrowRight'] = false;
+            });
+
+            // Pulo
+            bindButton(btnJump, () => {
+                if (window.game && window.game.humanPlayer) {
+                    window.game.humanPlayer.jump();
+                }
+            }, null);
+
+            // Esquiva / Dash
+            bindButton(btnDash, () => {
+                if (window.game && window.game.humanPlayer) {
+                    window.game.humanPlayer.dodge(window.game.humanPlayer.facing);
+                }
+            }, null);
+        }
+
+        window.addEventListener('DOMContentLoaded', setupTouchControls);
     </script>
 </body>
 </html>
