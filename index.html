@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Arena Sobrevivência 2D - O Escolhido</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.2.0">
 </head>
 <body>
 
@@ -97,6 +100,8 @@
                         🔄 JOGAR NOVAMENTE
                     </button>
                 </div>
+            </div>
+
             <!-- CONTROLES VIRTUAIS TOUCH PARA CELULAR -->
             <div id="touchGamepad" class="touch-gamepad">
                 <div class="touch-dpad">
@@ -170,12 +175,12 @@
         </aside>
     </main>
 
-    <!-- SCRIPTS MODULARES -->
-    <script src="audio.js"></script>
-    <script src="shelters.js"></script>
-    <script src="entities.js"></script>
-    <script src="invocations.js"></script>
-    <script src="game.js"></script>
+    <!-- SCRIPTS MODULARES (COM CONTROLE DE ATUALIZAÇÃO AUTOMÁTICA) -->
+    <script src="audio.js?v=1.2.0"></script>
+    <script src="shelters.js?v=1.2.0"></script>
+    <script src="entities.js?v=1.2.0"></script>
+    <script src="invocations.js?v=1.2.0"></script>
+    <script src="game.js?v=1.2.0"></script>
 
     <script>
         // Função para preencher sugestão rápida

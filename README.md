@@ -51,22 +51,27 @@ Um jogo de sobrevivência 2D em uma arena plana com barreiras e abrigos defensiv
 
 ---
 
-## 🌐 Como Jogar Online pelo GitHub Pages
+## 🌐 Como Jogar Online (Atualizações 100% Automáticas)
 
-Como este projeto é 100% nativo em HTML5, CSS3 e JavaScript puro (sem necessidade de backend ou compilação), você pode jogá-lo diretamente pelo navegador:
+O projeto está configurado com **GitHub Actions** para **CI/CD contínuo**. Toda vez que você fizer um `git push` para a branch `main`, o GitHub atualiza o jogo online automaticamente sem você precisar fazer nada manualmente!
 
-1. Faça o push deste repositório para o seu GitHub.
-2. No seu repositório no GitHub, clique na aba **Settings** (Configurações).
-3. No menu lateral esquerdo, clique em **Pages**.
-4. Em **Build and deployment > Source**, selecione **Deploy from a branch**.
-5. Selecione a branch `main` e a pasta `/ (root)`, depois clique em **Save**.
-6. Em instantes, o GitHub gerará um link público gratuito (ex: `https://seu-usuario.github.io/seu-repositorio/`) para você e seus amigos jogarem direto pelo navegador!
+### 🔧 Ativação no GitHub (Feito uma única vez):
+1. Suba o projeto para o seu repositório:
+   ```bash
+   git push -u origin main
+   ```
+2. No seu repositório no GitHub, vá em **Settings** > **Pages** (no menu lateral esquerdo).
+3. Em **Build and deployment > Source**, selecione: **GitHub Actions**.
+4. Pronto! A partir de agora, qualquer alteração que você commitar e enviar será publicada e atualizada **automaticamente** no ar em segundos!
 
 ---
 
 ## 📁 Estrutura de Arquivos
 
 ```
+├── .github/
+│   └── workflows/
+│       └── deploy.yml # Workflow de atualização automática no GitHub Pages
 ├── index.html        # Estrutura visual, canvas, HUD e modais interativos
 ├── style.css         # Estilização arcade sci-fi, glassmorphism e animações
 ├── audio.js          # Sintetizador sonoro Web Audio API (100% autônomo)
