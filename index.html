@@ -6,18 +6,20 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Arena Sobrevivência 2D - O Escolhido</title>
-    <link rel="stylesheet" href="style.css?v=2.0.0">
+    <title>Arena Sobrevivência 3D - Estilo Roblox</title>
+    <link rel="stylesheet" href="style.css?v=3.0.0">
+    <!-- Three.js Library via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
     <!-- BARRA SUPERIOR / HUD -->
     <header class="top-hud">
         <div class="brand">
-            <div class="brand-icon">⚡</div>
+            <div class="brand-icon">🧱</div>
             <div>
-                <h1>ARENA 2D: O ESCOLHIDO</h1>
-                <p>Sobreviva aos desastres, abrigue-se nos bunkers e invoque qualquer coisa!</p>
+                <h1>ARENA 3D: O ESCOLHIDO (ROBLOX STYLE)</h1>
+                <p>Mundo 3D em blocos com movimentação livre 360°, bunkers e invocações!</p>
             </div>
         </div>
 
@@ -41,21 +43,45 @@
         </div>
     </header>
 
-    <!-- PALCO PRINCIPAL DO JOGO -->
+    <!-- PALCO PRINCIPAL DO JOGO 3D -->
     <main class="main-stage">
         
-        <!-- COLUNA DA ESQUERDA: CANVAS LIMPO + PAINEL DE CONTROLES ABAIXO (SEM FICAR EM CIMA DO JOGO) -->
+        <!-- COLUNA DA ESQUERDA: CENA 3D + OVERLAY MOBILE -->
         <div class="game-column">
             
-            <!-- ÁREA DO CANVAS (100% LIMPA, SEM NENHUM BOTÃO OBSTRUINDO A VISÃO DO JOGO) -->
-            <div class="canvas-wrapper">
-                <canvas id="gameCanvas" width="1200" height="650"></canvas>
+            <!-- CONTAINER WEBGL THREE.JS (MUNDO 3D) -->
+            <div id="webgl-container" class="webgl-container">
+                
+                <!-- CONTROLES TOUCH PARA CELULAR (JOYSTICK 360° + ROTAÇÃO DE CÂMERA) -->
+                <div class="mobile-touch-overlay">
+                    <!-- Joystick Analógico 360° (Polegar Esquerdo) -->
+                    <div class="joystick-container">
+                        <div id="joystickBase" class="joystick-base">
+                            <div id="joystickStick" class="joystick-stick"></div>
+                        </div>
+                    </div>
+
+                    <!-- Área Direita para Deslizar e Girar a Câmera 3D -->
+                    <div id="touchCameraArea" class="touch-camera-area"></div>
+
+                    <!-- Botões de Ação Touch (Polegar Direito) -->
+                    <div class="mobile-action-buttons">
+                        <button id="btnTouchDash" class="m-btn m-btn-dash" aria-label="Esquiva">
+                            <span>⚡</span>
+                            <small>DASH</small>
+                        </button>
+                        <button id="btnTouchJump" class="m-btn m-btn-jump" aria-label="Pular">
+                            <span>▲</span>
+                            <small>PULO</small>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- MODAL 1: ROLETA DE SORTEIO -->
                 <div id="raffleModal" class="modal-overlay hidden">
                     <div class="modal-content gold">
                         <h2 class="modal-title">🎲 SORTEANDO O ESCOLHIDO...</h2>
-                        <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena?</p>
+                        <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena 3D?</p>
                         <div id="raffleCandidate" class="roulette-box">...</div>
                     </div>
                 </div>
@@ -64,7 +90,7 @@
                 <div id="inputModal" class="modal-overlay hidden">
                     <div class="modal-content gold">
                         <h2 class="modal-title" style="color: #facc15;">🎉 VOCÊ FOI O ESCOLHIDO!</h2>
-                        <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena e atacar todos os jogadores:</p>
+                        <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena 3D e atacar todos os jogadores:</p>
                         
                         <div class="input-group">
                             <div class="input-box-wrapper">
@@ -75,20 +101,19 @@
 
                         <!-- Botões de Atalho Rápido -->
                         <div class="quick-tags">
-                            <button class="tag-btn" onclick="setQuickInput('Goku')">⚡ Goku</button>
-                            <button class="tag-btn" onclick="setQuickInput('Chuva de Fogo')">🔥 Chuva de Fogo</button>
-                            <button class="tag-btn" onclick="setQuickInput('Tsunami')">🌊 Tsunami</button>
-                            <button class="tag-btn" onclick="setQuickInput('Godzilla')">🦖 Godzilla</button>
-                            <button class="tag-btn" onclick="setQuickInput('Tornado')">🌪️ Tornado</button>
-                            <button class="tag-btn" onclick="setQuickInput('Tempestade de Raios')">⚡ Raios</button>
-                            <button class="tag-btn" onclick="setQuickInput('Nave Alienígena')">🛸 Alien</button>
+                            <button class="tag-btn" onclick="setQuickInput('Goku')">⚡ Goku Roblox</button>
+                            <button class="tag-btn" onclick="setQuickInput('Chuva de Fogo')">🔥 Meteoros 3D</button>
+                            <button class="tag-btn" onclick="setQuickInput('Tsunami')">🌊 Tsunami 3D</button>
+                            <button class="tag-btn" onclick="setQuickInput('Godzilla')">🦖 Godzilla 3D</button>
+                            <button class="tag-btn" onclick="setQuickInput('Tornado')">🌪️ Tornado 3D</button>
+                            <button class="tag-btn" onclick="setQuickInput('Nave Alienígena')">🛸 Alien 3D</button>
                             <button class="tag-btn" onclick="setQuickInput('Bomba Nuclear')">☢️ Bomba Nuclear</button>
                             <button class="tag-btn" onclick="setQuickInput('Cadeira Voadora')">🪑 Cadeira Voadora</button>
                             <button class="tag-btn" onclick="setQuickInput('Shrek Gigante')">👹 Shrek</button>
                         </div>
 
                         <button id="submitSummonBtn" class="btn-summon" onclick="handleManualSubmit()">
-                            🔥 MATERIALIZAR NA ARENA!
+                            🔥 MATERIALIZAR NO MUNDO 3D!
                         </button>
                     </div>
                 </div>
@@ -105,97 +130,58 @@
                 </div>
             </div>
 
-            <!-- PAINEL DE CONTROLE DEDICADO (ABAIXO DA TELA, NUNCA EM CIMA DO JOGO) -->
-            <div id="controllerBar" class="controller-bar">
-                <!-- Direcionais da Esquerda -->
-                <div class="ctrl-group ctrl-direction">
-                    <button id="btnTouchLeft" class="ctrl-btn" aria-label="Mover Esquerda">
-                        <span class="ctrl-arrow">◀</span>
-                        <span class="ctrl-text">ESQUERDA</span>
-                    </button>
-                    <button id="btnTouchRight" class="ctrl-btn" aria-label="Mover Direita">
-                        <span class="ctrl-arrow">▶</span>
-                        <span class="ctrl-text">DIREITA</span>
-                    </button>
+            <!-- BARRA DE DICAS E CONTROLES DE TECLADO / MOUSE -->
+            <div class="controls-hint-bar">
+                <div>
+                    <strong>Computador:</strong> 
+                    <span class="hint-pill">W</span> <span class="hint-pill">A</span> <span class="hint-pill">S</span> <span class="hint-pill">D</span> Mover 360° |
+                    <span class="hint-pill">Mouse</span> Girar Câmera |
+                    <span class="hint-pill">Espaço</span> Pular |
+                    <span class="hint-pill">Shift</span> Dash
                 </div>
-
-                <!-- Indicador Central -->
-                <div class="ctrl-center-info">
-                    <div class="ctrl-status-badge">🎮 CONTROLES ATIVOS</div>
-                    <small>Toque na tela ou use WASD / Setas</small>
-                </div>
-
-                <!-- Botões de Ação da Direita -->
-                <div class="ctrl-group ctrl-action">
-                    <button id="btnTouchDash" class="ctrl-btn ctrl-btn-dash" aria-label="Esquiva">
-                        <span class="ctrl-icon">⚡</span>
-                        <span class="ctrl-text">DASH</span>
-                    </button>
-                    <button id="btnTouchJump" class="ctrl-btn ctrl-btn-jump" aria-label="Pular">
-                        <span class="ctrl-icon">▲</span>
-                        <span class="ctrl-text">PULO</span>
-                    </button>
+                <div>
+                    <strong>Celular:</strong> 
+                    <span>Joystick à Esquerda + Arrastar Tela à Direita</span>
                 </div>
             </div>
 
         </div>
 
-        <!-- PAINEL LATERAL (SOBREVIVENTES E REGRAS) -->
+        <!-- PAINEL LATERAL DIREITO -->
         <aside class="sidebar">
             
             <!-- Card de Sobreviventes -->
             <div class="panel-card">
                 <div class="card-title">
-                    <span>Sobreviventes</span>
+                    <span>Sobreviventes 3D</span>
                     <span class="badge" id="aliveCount">6</span>
                 </div>
                 <div id="survivorsList" class="survivors-container">
-                    <!-- Gerado dinamicamente via JavaScript -->
+                    <!-- Gerado dinamicamente -->
                 </div>
             </div>
 
-            <!-- Card de Controles e Dicas -->
+            <!-- Card de Dicas de Sobrevivência 3D -->
             <div class="panel-card">
                 <div class="card-title">
-                    <span>Controles</span>
-                </div>
-                <div class="controls-list">
-                    <div class="control-key">
-                        <span>Andar:</span>
-                        <div><span class="kbd">A</span> <span class="kbd">D</span> ou <span class="kbd">←</span> <span class="kbd">→</span></div>
-                    </div>
-                    <div class="control-key">
-                        <span>Pular:</span>
-                        <div><span class="kbd">W</span> <span class="kbd">↑</span> ou <span class="kbd">Espaço</span></div>
-                    </div>
-                    <div class="control-key">
-                        <span>Esquiva (Dash):</span>
-                        <div><span class="kbd">Shift</span> ou <span class="kbd">E</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card de Dicas de Sobrevivência -->
-            <div class="panel-card">
-                <div class="card-title">
-                    <span>🛡️ Dicas de Abrigo</span>
+                    <span>🛡️ Bunkers e Abrigos 3D</span>
                 </div>
                 <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">
-                    <p style="margin-bottom: 6px;">• <strong>Bunkers e Tetos:</strong> Protegem 100% contra Chuva de Fogo, Raios e Meteoros.</p>
-                    <p style="margin-bottom: 6px;">• <strong>Barreiras Verticais:</strong> Protegem contra o <strong>Kamehameha do Goku</strong> e a força da água do <strong>Tsunami</strong>.</p>
-                    <p>• <strong>Qualquer Palavra:</strong> Qualquer coisa digitada ganha vida para atacar!</p>
+                    <p style="margin-bottom: 6px;">• <strong>Bunkers Alpha e Ômega:</strong> Telhados blindados que bloqueiam 100% dos meteoros e raios que caem do céu.</p>
+                    <p style="margin-bottom: 6px;">• <strong>Muralhas e Barreiras:</strong> Protegem contra o feixe de raio do <strong>Kamehameha do Goku 3D</strong> e a força das águas.</p>
+                    <p>• <strong>Câmera 3D:</strong> Arraste com o mouse ou deslize o dedo na tela para olhar em qualquer direção!</p>
                 </div>
             </div>
 
         </aside>
     </main>
 
-    <!-- SCRIPTS MODULARES (COM CONTROLE DE ATUALIZAÇÃO AUTOMÁTICA) -->
-    <script src="audio.js?v=2.0.0"></script>
-    <script src="shelters.js?v=2.0.0"></script>
-    <script src="entities.js?v=2.0.0"></script>
-    <script src="invocations.js?v=2.0.0"></script>
-    <script src="game.js?v=2.0.0"></script>
+    <!-- SCRIPTS MODULARES DO JOGO 3D -->
+    <script src="audio.js?v=3.0.0"></script>
+    <script src="roblox_model.js?v=3.0.0"></script>
+    <script src="world3d.js?v=3.0.0"></script>
+    <script src="threats3d.js?v=3.0.0"></script>
+    <script src="game3d.js?v=3.0.0"></script>
 
     <script>
         function setQuickInput(val) {
@@ -225,82 +211,6 @@
                 btn.textContent = sounds.enabled ? '🔊 ÁUDIO: LIGADO' : '🔇 ÁUDIO: MUTADO';
             }
         }
-
-        // ================= CONFIGURAÇÃO DO CONTROLE EXTERNO =================
-        function setupTouchControls() {
-            const btnLeft = document.getElementById('btnTouchLeft');
-            const btnRight = document.getElementById('btnTouchRight');
-            const btnJump = document.getElementById('btnTouchJump');
-            const btnDash = document.getElementById('btnTouchDash');
-
-            window.addEventListener('touchstart', () => {
-                if (typeof sounds !== 'undefined') sounds.ensureContext();
-            }, { passive: true, once: true });
-
-            function bindButton(element, onDown, onUp) {
-                if (!element) return;
-
-                element.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    if (typeof sounds !== 'undefined') sounds.ensureContext();
-                    element.classList.add('active');
-                    onDown();
-                }, { passive: false });
-
-                element.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    element.classList.remove('active');
-                    if (onUp) onUp();
-                }, { passive: false });
-
-                element.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
-                    element.classList.remove('active');
-                    if (onUp) onUp();
-                }, { passive: false });
-
-                element.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
-                    element.classList.add('active');
-                    onDown();
-                });
-                element.addEventListener('mouseup', (e) => {
-                    e.preventDefault();
-                    element.classList.remove('active');
-                    if (onUp) onUp();
-                });
-                element.addEventListener('mouseleave', () => {
-                    element.classList.remove('active');
-                    if (onUp) onUp();
-                });
-            }
-
-            bindButton(btnLeft, () => {
-                if (window.game) window.game.keys['ArrowLeft'] = true;
-            }, () => {
-                if (window.game) window.game.keys['ArrowLeft'] = false;
-            });
-
-            bindButton(btnRight, () => {
-                if (window.game) window.game.keys['ArrowRight'] = true;
-            }, () => {
-                if (window.game) window.game.keys['ArrowRight'] = false;
-            });
-
-            bindButton(btnJump, () => {
-                if (window.game && window.game.humanPlayer) {
-                    window.game.humanPlayer.jump();
-                }
-            }, null);
-
-            bindButton(btnDash, () => {
-                if (window.game && window.game.humanPlayer) {
-                    window.game.humanPlayer.dodge(window.game.humanPlayer.facing);
-                }
-            }, null);
-        }
-
-        window.addEventListener('DOMContentLoaded', setupTouchControls);
     </script>
 </body>
 </html>

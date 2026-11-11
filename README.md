@@ -1,86 +1,69 @@
-# ⚡ Arena 2D: O Escolhido (Survival & Invocation Arena)
+# 🧱 Arena 3D: O Escolhido (Roblox Style Survival Arena)
 
+[![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=for-the-badge&logo=three.js)](https://threejs.org/)
+[![WebGL](https://img.shields.io/badge/WebGL-3D-990000?style=for-the-badge&logo=webgl&logoColor=white)](https://developer.mozilla.org/pt-BR/docs/Web/API/WebGL_API)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/pt-BR/docs/Web/HTML)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
-[![Canvas API](https://img.shields.io/badge/Canvas_API-0284c7?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/pt-BR/docs/Web/API/Canvas_API)
 [![Web Audio](https://img.shields.io/badge/Web_Audio_API-10b981?style=for-the-badge&logo=webaudio&logoColor=white)](https://developer.mozilla.org/pt-BR/docs/Web/API/Web_Audio_API)
 
-Um jogo de sobrevivência 2D em uma arena plana com barreiras e abrigos defensivos, múltiplos jogadores com inteligência artificial e uma mecânica única de **Sorteio Periódico (1 minuto)**: o jogador sorteado pode digitar **qualquer palavra**, e ela se materializa na arena com poderes para tentar derrotar todos os sobreviventes!
-
----
-
-## 🎮 Mecânicas do Jogo
-
-- **Arena Plana e Abrigos**:
-  - **Bunkers Alpha e Ômega (com Teto Blindado)**: Proteção 100% contra catástrofes aéreas (chuva de fogo, meteoros, relâmpagos e ataques orbitais).
-  - **Barreiras Verticais Anti-Impacto**: Bloqueiam ataques horizontais, como a força das águas do **Tsunami** e o feixe frontal do **Kamehameha**.
-  - **Cúpula Central**: Abrigo com cobertura arqueada e pilares metálicos.
-- **Sorteio do Escolhido (A cada 60 segundos)**:
-  - Uma roleta animada escolhe um jogador vivo.
-  - Se for você, abre-se uma tela interativa para você digitar o que deseja invocar na arena!
-  - Se for um bot, ele escolhe uma catástrofe automaticamente.
-- **Motor de Invocação Dinâmica**:
-  - **Goku (Super Saiyajin)**: Voa com aura dourada, atira Ki Blasts, usa teletransporte e dispara um **Kamehameha** massivo pela tela.
-  - **Chuva de Fogo / Meteoros**: Queima a superfície descoberta.
-  - **Tsunami**: Enorme onda de água que empurra e esmaga quem não estiver atrás de barreiras.
-  - **Godzilla**: Terremotos no chão e raio atômico roxo.
-  - **Tornado, Raios, Nave Alienígena e Bomba Nuclear**.
-  - **Gerador Procedural Universal**: Digite *qualquer palavra* (ex: `cadeira voadora`, `shrek`, `batata`) e um monstro exclusivo é gerado com base no texto, com projéteis temáticos e o nome em neon atacando todos!
-- **Áudio Procedural Nativo**:
-  - Efeitos sonoros gerados diretamente pela **Web Audio API** (sem arquivos externos ou dependências de carregamento).
-- **Interface Limpa e Controles Dedicados**:
-  - A tela do jogo é 100% limpa, sem botões cobrindo os personagens.
-  - Painel de controle dedicado posicionado abaixo do jogo, ideal tanto para toques no celular quanto para cliques no computador.
+Um jogo de sobrevivência em **Terceira Dimensão (3D Real)** no estilo clássico do **Roblox**:
+- **Avatares em Blocos R6**: Modelos com corpo em blocos, clássica carinha sorridente amarela, animação característica de passos (braços e pernas balançando) e placas de vida flutuantes em 3D.
+- **Movimentação Livre 360° e Câmera em Terceira Pessoa**: Ande para qualquer lugar pelo mapa amplo e gire a câmera livremente ao redor do seu personagem.
+- **Baseplate com Textura de Pinos (Studs)**: Chão plano clássico do Roblox com shaders de luz solar, sombras suaves e névoa.
+- **Abrigos e Bunkers 3D**: Bunkers sólidos com telhados blindados que protegem de ataques do céu, cúpula central e muralhas de impacto.
+- **Sorteio do Escolhido a cada 1 Minuto**: Um jogador vivo é sorteado para escrever **qualquer palavra**, e ela se materializa em 3D para atacar a arena!
+- **Goku 3D Super Saiyajin**: Feito em blocos com cabelo dourado espetado, kimono laranja, teletransporte e **Kamehameha volumétrico 3D** varrendo o mapa!
 
 ---
 
 ## 🕹️ Controles
 
-### 📱 No Celular / Dispositivos Móveis (Barra de Controles Abaixo do Jogo)
-- **Botões `◀ ESQUERDA` e `DIREITA ▶`**: Movimentar o personagem.
-- **Botão `▲ PULO` (Verde)**: Pular para alcançar abrigos ou esquivar de tremores.
-- **Botão `⚡ DASH` (Dourado)**: Esquiva rápida com invulnerabilidade temporária.
-- **Multi-Touch Completo**: Você pode segurar para andar e apertar o pulo ao mesmo tempo com os dois polegares!
-
 ### 💻 No Computador
-| Ação | Teclas |
+| Ação | Controle |
 | :--- | :--- |
-| **Mover para Esquerda / Direita** | `A` / `D` ou `←` / `→` |
-| **Pular** | `W`, `↑` ou `Espaço` |
+| **Mover 360°** | Teclas `W`, `A`, `S`, `D` ou `Setas` |
+| **Girar Câmera 3D** | Clicar e arrastar com o botão esquerdo do Mouse |
+| **Zoom da Câmera** | Roda do Mouse (Scroll) |
+| **Pular** | Barra de `Espaço` |
 | **Esquiva Rápida (Dash)** | `Shift` ou `E` |
-| **Digitar Invocação** | Campo de texto do modal + tecla `Enter` |
 | **Sorteio Imediato (Teste)** | Botão `🎲 SORTEAR AGORA` |
+
+### 📱 No Celular / Dispositivos Móveis
+- **Joystick Virtual 360° (Canto inferior esquerdo)**: Movimente seu avatar em qualquer direção com o polegar esquerdo.
+- **Girar Câmera 3D**: Deslize o dedo livremente no lado direito da tela para olhar para onde quiser.
+- **Botão `▲ PULO` (Verde)**: Pular obstáculos e desviar de terremotos.
+- **Botão `⚡ DASH` (Dourado)**: Esquiva veloz com invulnerabilidade temporária.
+- **Suporte Multi-Touch Total**: Você pode correr, pular e girar a câmera simultaneamente!
 
 ---
 
-## 🌐 Como Jogar Online (Atualizações 100% Automáticas)
+## 🌐 Atualizações 100% Automáticas (GitHub Pages + Actions)
 
-O projeto está configurado com **GitHub Actions** para **CI/CD contínuo**. Toda vez que você fizer um `git push` para a branch `main`, o GitHub atualiza o jogo online automaticamente sem você precisar fazer nada manualmente!
+O projeto está configurado com **GitHub Actions** (`.github/workflows/deploy.yml`). Toda vez que você fizer `git push`, o jogo atualiza automaticamente na nuvem:
 
-### 🔧 Ativação no GitHub (Feito uma única vez):
-1. Suba o projeto para o seu repositório:
+1. Suba o código para o seu repositório:
    ```bash
    git push -u origin main
    ```
-2. No seu repositório no GitHub, vá em **Settings** > **Pages** (no menu lateral esquerdo).
-3. Em **Build and deployment > Source**, selecione: **GitHub Actions**.
-4. Pronto! A partir de agora, qualquer alteração que você commitar e enviar será publicada e atualizada **automaticamente** no ar em segundos!
+2. No repositório do GitHub, vá em **Settings** > **Pages**.
+3. Em **Build and deployment > Source**, escolha **GitHub Actions**.
+4. Pronto! O site 3D estará no ar e será atualizado a cada commit.
 
 ---
 
-## 📁 Estrutura de Arquivos
+## 📁 Estrutura de Arquivos 3D
 
 ```
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml # Workflow de atualização automática no GitHub Pages
-├── index.html        # Estrutura visual, canvas limpo, controles e modais
-├── style.css         # Estilização arcade, layout desacoplado e animações
-├── audio.js          # Sintetizador sonoro Web Audio API (100% autônomo)
-├── shelters.js       # Gerenciador de barreiras, bunkers e verificação de proteção
-├── entities.js       # Classes de Jogador (Humano e Bots com IA de fuga)
-├── invocations.js    # Motor de invocações (Goku, Desastres e Gerador Universal)
-├── game.js           # Loop principal 60 FPS, física e roleta de sorteio
-├── .gitignore        # Arquivos ignorados pelo Git
-└── README.md         # Documentação do projeto
+│       └── deploy.yml   # CI/CD de deploy automático no GitHub Pages
+├── index.html          # Viewport WebGL Three.js, HUD e Joystick virtual
+├── style.css           # Estilos modernos, HUD translúcido e modais
+├── audio.js            # Sintetizador sonoro Web Audio API (100% nativo)
+├── roblox_model.js     # Construtor de avatares Roblox R6, animação de andar e Goku
+├── world3d.js          # Baseplate com textura de studs, iluminação e bunkers 3D
+├── threats3d.js        # Boss Goku 3D, Kamehameha volumétrico, meteoros e desastres
+├── game3d.js           # Engine Three.js, câmera 3ª pessoa e ciclo de sorteio
+├── .gitignore          # Arquivos ignorados pelo Git
+└── README.md           # Documentação completa
 ```
