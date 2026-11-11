@@ -7,26 +7,26 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Arena Sobrevivência 3D - Estilo Roblox</title>
-    <link rel="stylesheet" href="style.css?v=3.0.0">
+    <link rel="stylesheet" href="style.css?v=3.5.0">
     <!-- Three.js Library via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR / HUD -->
+    <!-- BARRA SUPERIOR / HUD REESTRUTURADO -->
     <header class="top-hud">
         <div class="brand">
             <div class="brand-icon">🧱</div>
             <div>
                 <h1>ARENA 3D: O ESCOLHIDO (ROBLOX STYLE)</h1>
-                <p>Mundo 3D em blocos com movimentação livre 360°, bunkers e invocações!</p>
+                <p>Mundo 3D em blocos com movimentação 360°, abrigos e invocações por texto!</p>
             </div>
         </div>
 
         <!-- Temporizador do Sorteio (1 minuto) -->
         <div class="raffle-hud">
             <div class="raffle-label">
-                <span>🎲</span> PRÓXIMO SORTEIO EM: <span id="timerText">60s</span>
+                <span>🎲</span> PRÓXIMO SORTEIO: <span id="timerText">60s</span>
             </div>
             <div class="progress-container">
                 <div id="timerBar" class="progress-bar"></div>
@@ -46,13 +46,30 @@
     <!-- PALCO PRINCIPAL DO JOGO 3D -->
     <main class="main-stage">
         
-        <!-- COLUNA DA ESQUERDA: CENA 3D + OVERLAY MOBILE -->
+        <!-- COLUNA DA ESQUERDA: CENA 3D + OVERLAY DE NOTIFICAÇÕES -->
         <div class="game-column">
             
             <!-- CONTAINER WEBGL THREE.JS (MUNDO 3D) -->
             <div id="webgl-container" class="webgl-container">
                 
-                <!-- CONTROLES TOUCH PARA CELULAR (JOYSTICK 360° + ROTAÇÃO DE CÂMERA) -->
+                <!-- 1. BARRA HUD FIXA DE AMEAÇA ATIVA NO TOPO DO JOGO -->
+                <div id="threatHudBar" class="threat-hud-bar hidden">
+                    <span class="threat-pulse-dot"></span>
+                    <span id="threatHudName" class="threat-hud-title">AMEAÇA: GOKU</span>
+                    <span class="threat-divider">|</span>
+                    <span id="threatHudAuthor" class="threat-hud-author">Por: Você</span>
+                    <span class="threat-divider">|</span>
+                    <span id="threatHudCountdown" class="threat-hud-timer">18s</span>
+                </div>
+
+                <!-- 2. POPUP GIGANTE DE NOTIFICAÇÃO DE O QUE FOI ESCOLHIDO -->
+                <div id="summonBigBanner" class="summon-big-banner hidden">
+                    <div class="summon-badge">🚨 NOVA INVOCAÇÃO NA ARENA! 🚨</div>
+                    <div id="summonNameDisplay" class="summon-title">GOKU (SUPER SAIYAJIN)</div>
+                    <div id="summonAuthorDisplay" class="summon-author">Invocado por: Você (P1)</div>
+                </div>
+
+                <!-- 3. CONTROLES TOUCH MOBILE (JOYSTICK 360° + ROTAÇÃO DE CÂMERA) -->
                 <div class="mobile-touch-overlay">
                     <!-- Joystick Analógico 360° (Polegar Esquerdo) -->
                     <div class="joystick-container">
@@ -77,24 +94,24 @@
                     </div>
                 </div>
 
-                <!-- MODAL 1: ROLETA DE SORTEIO -->
+                <!-- MODAL: ROLETA DE SORTEIO -->
                 <div id="raffleModal" class="modal-overlay hidden">
                     <div class="modal-content gold">
                         <h2 class="modal-title">🎲 SORTEANDO O ESCOLHIDO...</h2>
-                        <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena 3D?</p>
+                        <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena?</p>
                         <div id="raffleCandidate" class="roulette-box">...</div>
                     </div>
                 </div>
 
-                <!-- MODAL 2: CAIXA DE DIGITAÇÃO DO ESCOLHIDO -->
+                <!-- MODAL: CAIXA DE DIGITAÇÃO DO ESCOLHIDO -->
                 <div id="inputModal" class="modal-overlay hidden">
                     <div class="modal-content gold">
                         <h2 class="modal-title" style="color: #facc15;">🎉 VOCÊ FOI O ESCOLHIDO!</h2>
-                        <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena 3D e atacar todos os jogadores:</p>
+                        <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena e atacar todos os jogadores:</p>
                         
                         <div class="input-group">
                             <div class="input-box-wrapper">
-                                <input type="text" id="invocationInput" class="invocation-input" placeholder="Ex: Goku, Chuva de Fogo, Tsunami, Godzilla..." maxlength="40" autocomplete="off">
+                                <input type="text" id="invocationInput" class="invocation-input" placeholder="Digite QUALQUER coisa... Ex: Goku, Tsunami, Alien, Cadeira..." maxlength="40" autocomplete="off">
                                 <div id="inputCountdown" class="input-countdown">15s</div>
                             </div>
                         </div>
@@ -118,7 +135,7 @@
                     </div>
                 </div>
 
-                <!-- MODAL 3: VITÓRIA OU DERROTA -->
+                <!-- MODAL: VITÓRIA OU DERROTA -->
                 <div id="gameOverModal" class="modal-overlay hidden">
                     <div class="modal-content">
                         <h2 id="gameOverTitle" class="modal-title">FIM DE JOGO</h2>
@@ -130,16 +147,16 @@
                 </div>
             </div>
 
-            <!-- BARRA DE DICAS E CONTROLES DE TECLADO / MOUSE -->
+            <!-- BARRA DE CONTROLES E DICAS -->
             <div class="controls-hint-bar">
-                <div>
+                <div class="hint-group">
                     <strong>Computador:</strong> 
                     <span class="hint-pill">W</span> <span class="hint-pill">A</span> <span class="hint-pill">S</span> <span class="hint-pill">D</span> Mover 360° |
-                    <span class="hint-pill">Mouse</span> Girar Câmera |
-                    <span class="hint-pill">Espaço</span> Pular |
+                    <span class="hint-pill">Mouse</span> Câmera |
+                    <span class="hint-pill">Espaço</span> Pulo |
                     <span class="hint-pill">Shift</span> Dash
                 </div>
-                <div>
+                <div class="hint-group">
                     <strong>Celular:</strong> 
                     <span>Joystick à Esquerda + Arrastar Tela à Direita</span>
                 </div>
@@ -147,7 +164,7 @@
 
         </div>
 
-        <!-- PAINEL LATERAL DIREITO -->
+        <!-- PAINEL LATERAL DIREITO (SOBREVIVENTES E BUNKERS) -->
         <aside class="sidebar">
             
             <!-- Card de Sobreviventes -->
@@ -168,7 +185,7 @@
                 </div>
                 <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">
                     <p style="margin-bottom: 6px;">• <strong>Bunkers Alpha e Ômega:</strong> Telhados blindados que bloqueiam 100% dos meteoros e raios que caem do céu.</p>
-                    <p style="margin-bottom: 6px;">• <strong>Muralhas e Barreiras:</strong> Protegem contra o feixe de raio do <strong>Kamehameha do Goku 3D</strong> e a força das águas.</p>
+                    <p style="margin-bottom: 6px;">• <strong>Muralhas e Barreiras:</strong> Fique atrás delas para não ser atingido pelo raio do <strong>Kamehameha do Goku</strong> ou pela água do <strong>Tsunami</strong>.</p>
                     <p>• <strong>Câmera 3D:</strong> Arraste com o mouse ou deslize o dedo na tela para olhar em qualquer direção!</p>
                 </div>
             </div>
@@ -177,11 +194,11 @@
     </main>
 
     <!-- SCRIPTS MODULARES DO JOGO 3D -->
-    <script src="audio.js?v=3.0.0"></script>
-    <script src="roblox_model.js?v=3.0.0"></script>
-    <script src="world3d.js?v=3.0.0"></script>
-    <script src="threats3d.js?v=3.0.0"></script>
-    <script src="game3d.js?v=3.0.0"></script>
+    <script src="audio.js?v=3.5.0"></script>
+    <script src="roblox_model.js?v=3.5.0"></script>
+    <script src="world3d.js?v=3.5.0"></script>
+    <script src="threats3d.js?v=3.5.0"></script>
+    <script src="game3d.js?v=3.5.0"></script>
 
     <script>
         function setQuickInput(val) {

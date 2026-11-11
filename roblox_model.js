@@ -270,6 +270,11 @@ class RobloxModelFactory {
         goku.add(auraMesh);
         goku.auraMesh = auraMesh;
 
+        // Eleva o billboard para ficar visível acima do cabelo espetado
+        if (goku.parts && goku.parts.billboard) {
+            goku.parts.billboard.position.y = 5.8;
+        }
+
         return goku;
     }
 
@@ -309,6 +314,11 @@ class RobloxModelFactory {
 
         boss.word = word;
         boss.hue = hue;
+
+        if (boss.parts && boss.parts.billboard) {
+            boss.parts.billboard.position.y = 5.4;
+        }
+
         return boss;
     }
 }

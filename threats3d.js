@@ -1,4 +1,4 @@
-// threats3d.js - Motor de Ameaças 3D (Goku Roblox, Kamehameha Volumétrico, Meteoros e Bosses)
+// threats3d.js - Motor de Ameaças 3D com Notificações Visuais em Tempo Real
 
 class ThreatManager3D {
     constructor(scene) {
@@ -7,6 +7,16 @@ class ThreatManager3D {
         this.projectiles = [];
         this.particles = [];
         this.announcements = [];
+
+        // Elementos visuais do HUD
+        this.bigBannerEl = document.getElementById('summonBigBanner');
+        this.bannerTitleEl = document.getElementById('summonNameDisplay');
+        this.bannerAuthorEl = document.getElementById('summonAuthorDisplay');
+
+        this.hudBarEl = document.getElementById('threatHudBar');
+        this.hudNameEl = document.getElementById('threatHudName');
+        this.hudAuthorEl = document.getElementById('threatHudAuthor');
+        this.hudTimerEl = document.getElementById('threatHudCountdown');
     }
 
     // Identifica o tipo de catástrofe ou boss baseado no texto digitado
@@ -28,6 +38,12 @@ class ThreatManager3D {
         if (text.includes('tornado') || text.includes('vento') || text.includes('furacao') || text.includes('furacão')) {
             return { type: 'tornado', name: 'Tornado de Blocos 3D', raw: rawText };
         }
+        if (text.includes('alien') || text.includes('ovni') || text.includes('ufo') || text.includes('disco voador')) {
+            return { type: 'alien', name: 'Nave Alienígena 3D', raw: rawText };
+        }
+        if (text.includes('bomba') || text.includes('nuclear') || text.includes('nuke')) {
+            return { type: 'nuke', name: 'Bomba Nuclear 3D', raw: rawText };
+        }
 
         // QUALQUER OUTRA PALAVRA DIGITADA -> Boss Procedural 3D!
         return {
@@ -37,9 +53,8 @@ class ThreatManager3D {
         };
     }
 
-    // Invoca a ameaça 3D
+    // Invoca a ameaça 3D e MOSTRA CLARAMENTE NA TELA O QUE FOI ESCOLHIDO!
     invoke(rawText, playerName) {
-        // Remove ameaça anterior se houver
         this.cleanup();
 
         const info = this.parseInvocationText(rawText);
@@ -60,15 +75,37 @@ class ThreatManager3D {
 
         if (sounds) sounds.playAlert();
 
+        // 1. ATUALIZA E EXIBE O POPUP GIGANTE DO QUE FOI ESCOLHIDO
+        if (this.bigBannerEl && this.bannerTitleEl && this.bannerAuthorEl) {
+            this.bannerTitleEl.textContent = info.name.toUpperCase();
+            this.bannerAuthorEl.textContent = `Invocado por: ${playerName}`;
+            this.bigBannerEl.classList.remove('hidden');
+
+            // Esconde o popup gigante após 4 segundos
+            clearTimeout(this.bannerTimeout);
+            this.bannerTimeout = setTimeout(() => {
+                if (this.bigBannerEl) this.bigBannerEl.classList.add('hidden');
+            }, 4000);
+        }
+
+        // 2. ATUALIZA E EXIBE A BARRA HUD PERSISTENTE DE AMEAÇA
+        if (this.hudBarEl && this.hudNameEl && this.hudAuthorEl && this.hudTimerEl) {
+            this.hudNameEl.textContent = `AMEAÇA: ${info.name.toUpperCase()}`;
+            this.hudAuthorEl.textContent = `Por: ${playerName}`;
+            this.hudTimerEl.textContent = `${durationSeconds}s`;
+            this.hudBarEl.classList.remove('hidden');
+        }
+
+        // 3. Inicializa entidade 3D correspondente
         if (info.type === 'goku') {
             this.initGoku();
         } else if (info.type === 'godzilla') {
             this.initGodzilla();
         } else if (info.type === 'procedural') {
             this.initProceduralBoss(info.raw);
+        } else if (info.type === 'alien') {
+            this.initAlien();
         }
-
-        this.addAnnouncement(`⚠️ ${playerName.toUpperCase()} INVOCOU: ${info.name.toUpperCase()}!`, '#ef4444');
     }
 
     // Inicializa Goku 3D
@@ -78,10 +115,10 @@ class ThreatManager3D {
         this.scene.add(goku);
         this.activeThreat.bossMesh = goku;
 
-        // Cilindro do Kamehameha (inicialmente invisível)
+        // Cilindro do Kamehameha
         const beamGeo = new THREE.CylinderGeometry(2.2, 2.2, 140, 16);
         beamGeo.rotateX(Math.PI / 2);
-        beamGeo.translate(0, 0, 70); // Origem nas mãos do Goku
+        beamGeo.translate(0, 0, 70);
 
         const beamMat = new THREE.MeshBasicMaterial({
             color: 0x38bdf8,
@@ -90,7 +127,6 @@ class ThreatManager3D {
         });
         const beamMesh = new THREE.Mesh(beamGeo, beamMat);
 
-        // Núcleo branco super concentrado
         const innerBeamGeo = new THREE.CylinderGeometry(1.2, 1.2, 140, 16);
         innerBeamGeo.rotateX(Math.PI / 2);
         innerBeamGeo.translate(0, 0, 70);
@@ -112,21 +148,31 @@ class ThreatManager3D {
         this.activeThreat.bossMesh = gz;
     }
 
-    // Inicializa Boss Procedural 3D para qualquer palavra
+    // Inicializa Nave Alienígena 3D
+    initAlien() {
+        const ufoGroup = new THREE.Group();
+        const diskGeo = new THREE.CylinderGeometry(5, 7, 1.5, 16);
+        const diskMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
+        const disk = new THREE.Mesh(diskGeo, diskMat);
+        ufoGroup.add(disk);
+
+        const domeGeo = new THREE.SphereGeometry(3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+        const domeMat = new THREE.MeshStandardMaterial({ color: 0x10b981, transparent: true, opacity: 0.7 });
+        const dome = new THREE.Mesh(domeGeo, domeMat);
+        dome.position.y = 0.75;
+        ufoGroup.add(dome);
+
+        ufoGroup.position.set(0, 18, 0);
+        this.scene.add(ufoGroup);
+        this.activeThreat.bossMesh = ufoGroup;
+    }
+
+    // Inicializa Boss Procedural 3D para qualquer palavra livre
     initProceduralBoss(word) {
         const boss = robloxFactory.createProceduralRobloxBoss(word);
         boss.position.set(0, 12, 0);
         this.scene.add(boss);
         this.activeThreat.bossMesh = boss;
-    }
-
-    addAnnouncement(text, color = '#ffffff') {
-        this.announcements.push({
-            text: text,
-            color: color,
-            alpha: 1.0,
-            y: 120
-        });
     }
 
     // Adiciona projétil 3D
@@ -140,20 +186,18 @@ class ThreatManager3D {
 
     // Atualização principal da ameaça 3D
     update(players, world3d, onScreenShake) {
-        // Notificações
-        for (let i = this.announcements.length - 1; i >= 0; i--) {
-            const a = this.announcements[i];
-            a.alpha -= 0.007;
-            if (a.alpha <= 0) this.announcements.splice(i, 1);
-        }
-
         if (!this.activeThreat) return;
 
         const threat = this.activeThreat;
         threat.duration--;
 
+        // Atualiza contador em tempo real no HUD
+        if (this.hudTimerEl) {
+            const sec = Math.max(0, Math.ceil(threat.duration / 60));
+            this.hudTimerEl.textContent = `${sec}s`;
+        }
+
         if (threat.duration <= 0) {
-            this.addAnnouncement(`✅ O ATAQUE DE ${threat.name.toUpperCase()} TERMINOU!`, '#22c55e');
             this.cleanup();
             return;
         }
@@ -166,20 +210,22 @@ class ThreatManager3D {
             this.updateTsunami(threat, players, world3d, onScreenShake);
         } else if (threat.type === 'godzilla') {
             this.updateGodzilla(threat, players, world3d, onScreenShake);
+        } else if (threat.type === 'alien') {
+            this.updateAlien(threat, players, world3d);
+        } else if (threat.type === 'nuke') {
+            this.updateNuke(threat, players, world3d, onScreenShake);
         } else if (threat.type === 'procedural') {
             this.updateProceduralBoss(threat, players, world3d, onScreenShake);
         }
 
-        // Atualiza Projéteis 3D
         this.updateProjectiles(players, world3d);
     }
 
-    // Lógica do Goku 3D (Super Saiyajin)
+    // Lógica do Goku 3D
     updateGoku(threat, players, world3d, onScreenShake) {
         const goku = threat.bossMesh;
         threat.actionTimer++;
 
-        // Rotação suave da aura dourada
         if (goku.auraMesh) {
             goku.auraMesh.rotation.y += 0.04;
             goku.auraMesh.scale.setScalar(1 + Math.sin(Date.now() / 150) * 0.12);
@@ -189,7 +235,6 @@ class ThreatManager3D {
         const targetPlayer = living[0] || null;
 
         if (threat.subState === 'hover') {
-            // Voa suavemente sobre os jogadores
             if (targetPlayer) {
                 goku.position.x += (targetPlayer.mesh.position.x - goku.position.x) * 0.03;
                 goku.position.z += (targetPlayer.mesh.position.z - goku.position.z) * 0.03;
@@ -197,7 +242,6 @@ class ThreatManager3D {
             }
             goku.position.y = 13 + Math.sin(Date.now() / 300) * 2;
 
-            // Disparos de Esferas de Ki 3D ocasionais
             if (threat.actionTimer % 45 === 0 && targetPlayer) {
                 const target = living[Math.floor(Math.random() * living.length)];
                 const orbGeo = new THREE.SphereGeometry(0.8, 12, 12);
@@ -210,12 +254,10 @@ class ThreatManager3D {
                 if (sounds) sounds.playJump();
             }
 
-            // A cada 5.5 segundos prepara o KAMEHAMEHA!
-            if (threat.actionTimer > 320) {
+            if (threat.actionTimer > 300) {
                 threat.subState = 'charging_kamehameha';
                 threat.actionTimer = 0;
 
-                // Teleporta para um ponto estratégico elevado da arena
                 const angles = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
                 const ang = angles[Math.floor(Math.random() * angles.length)];
                 goku.position.set(Math.cos(ang) * 45, 6, Math.sin(ang) * 45);
@@ -228,7 +270,8 @@ class ThreatManager3D {
                     sounds.playTeleport();
                     sounds.playChargeEnergy(2.0);
                 }
-                this.addAnnouncement("GOKU: KA... ME... HA... ME...", '#38bdf8');
+
+                if (this.hudNameEl) this.hudNameEl.textContent = "GOKU: KA... ME... HA... ME...";
             }
 
         } else if (threat.subState === 'charging_kamehameha') {
@@ -236,25 +279,21 @@ class ThreatManager3D {
                 threat.subState = 'firing_kamehameha';
                 threat.actionTimer = 0;
                 threat.kamehamehaBeam.visible = true;
-                this.addAnnouncement("GOKU: ...HAAAAAAAA!!!", '#0284c7');
                 if (sounds) sounds.playKamehamehaBlast();
+                if (this.hudNameEl) this.hudNameEl.textContent = "GOKU: ...HAAAAAAAA!!!";
             }
 
         } else if (threat.subState === 'firing_kamehameha') {
             if (onScreenShake) onScreenShake(7);
 
-            // Posiciona e orienta o raio a partir do Goku
             const beam = threat.kamehamehaBeam;
             beam.position.copy(goku.position);
             beam.rotation.copy(goku.rotation);
 
-            // Varre suavemente a direção do feixe
             goku.rotation.y += Math.sin(threat.actionTimer * 0.05) * 0.015;
 
-            // Vetor de direção do feixe
             const beamDir = new THREE.Vector3(0, 0, 1).applyEuler(goku.rotation);
 
-            // Dano contínuo a quem estiver na trajetória do raio
             players.forEach(p => {
                 if (!p.alive) return;
                 const toPlayer = new THREE.Vector3().subVectors(p.mesh.position, goku.position);
@@ -263,7 +302,6 @@ class ThreatManager3D {
                 if (proj > 0 && proj < 130) {
                     const perp = new THREE.Vector3().subVectors(toPlayer, beamDir.clone().multiplyScalar(proj));
                     if (perp.length() < 5.0) {
-                        // Verifica se uma barreira sólida ou bunker protege o jogador
                         const isProtected = world3d.isProtectedFromThreat(p.mesh.position, goku.position);
                         if (!isProtected) {
                             p.takeDamage(1.5, goku.position);
@@ -276,6 +314,7 @@ class ThreatManager3D {
                 beam.visible = false;
                 threat.subState = 'hover';
                 threat.actionTimer = 0;
+                if (this.hudNameEl) this.hudNameEl.textContent = `AMEAÇA: ${threat.name.toUpperCase()}`;
             }
         }
     }
@@ -324,7 +363,6 @@ class ThreatManager3D {
         players.forEach(p => {
             if (!p.alive) return;
             if (Math.abs(p.mesh.position.z - wave.position.z) < 3.5) {
-                // Se estiver abrigado no bunker, a água não arrasta
                 if (!world3d.isInsideBunker(p.mesh.position)) {
                     p.takeDamage(1.5, wave.position);
                     p.mesh.position.z += 1.8;
@@ -343,15 +381,55 @@ class ThreatManager3D {
         const gz = threat.bossMesh;
         threat.actionTimer++;
 
-        // Terremoto a cada 4 segundos
         if (threat.actionTimer % 240 === 0) {
             if (onScreenShake) onScreenShake(14);
             if (sounds) sounds.playExplosion();
-            this.addAnnouncement("🦖 GODZILLA PISOU! TERREMOTO NO SOLO 3D!", '#f97316');
 
             players.forEach(p => {
                 if (p.alive && p.mesh.position.y < 0.2 && !world3d.isInsideBunker(p.mesh.position)) {
                     p.takeDamage(25, gz.position);
+                }
+            });
+        }
+    }
+
+    // Lógica da Nave Alienígena 3D
+    updateAlien(threat, players, world3d) {
+        const ufo = threat.bossMesh;
+        threat.actionTimer++;
+
+        ufo.position.x = Math.sin(threat.actionTimer * 0.02) * 40;
+        ufo.position.z = Math.cos(threat.actionTimer * 0.02) * 40;
+
+        if (threat.actionTimer % 45 === 0) {
+            const living = players.filter(p => p.alive);
+            const target = living[Math.floor(Math.random() * living.length)];
+            if (target) {
+                const laserGeo = new THREE.CylinderGeometry(0.3, 0.3, 3, 8);
+                const laserMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+                const laser = new THREE.Mesh(laserGeo, laserMat);
+                laser.position.copy(ufo.position);
+
+                const dir = new THREE.Vector3().subVectors(target.mesh.position, ufo.position).normalize();
+                this.addProjectile(laser, dir.multiplyScalar(0.9), 18, 'laser');
+                if (sounds) sounds.playJump();
+            }
+        }
+    }
+
+    // Lógica da Bomba Nuclear 3D
+    updateNuke(threat, players, world3d, onScreenShake) {
+        threat.actionTimer++;
+        const remainingFrames = threat.maxDuration - threat.actionTimer;
+
+        if (remainingFrames === 60) {
+            if (onScreenShake) onScreenShake(25);
+            if (sounds) sounds.playExplosion();
+
+            players.forEach(p => {
+                if (!p.alive) return;
+                if (!world3d.isInsideBunker(p.mesh.position)) {
+                    p.takeDamage(75, new THREE.Vector3(0, 0, 0));
                 }
             });
         }
@@ -390,17 +468,14 @@ class ThreatManager3D {
 
             let hit = false;
 
-            // Se for meteoro e colidir com teto blindado de um bunker
             if (p.projectileType === 'meteor' && world3d.isProtectedFromAbove(p.position)) {
                 hit = true;
             }
 
-            // Colisão com o chão
             if (p.position.y <= 0) {
                 hit = true;
             }
 
-            // Colisão com jogadores
             if (!hit) {
                 for (const player of players) {
                     if (player.alive && p.position.distanceTo(player.mesh.position) < 2.0) {
@@ -418,8 +493,10 @@ class ThreatManager3D {
         }
     }
 
-    // Limpeza de meshes ao fim da ameaça
     cleanup() {
+        if (this.hudBarEl) this.hudBarEl.classList.add('hidden');
+        if (this.bigBannerEl) this.bigBannerEl.classList.add('hidden');
+
         if (!this.activeThreat) return;
 
         if (this.activeThreat.bossMesh) {

@@ -456,6 +456,7 @@ class Game3D {
             currentIdx = (currentIdx + 1) % living.length;
             const candidate = living[currentIdx];
             candidateEl.textContent = candidate.name;
+            candidateEl.style.color = candidate.isHuman ? '#38bdf8' : '#ffffff';
 
             if (sounds) sounds.playTick();
             ticks++;
