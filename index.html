@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Sobrevivência 2D - O Escolhido</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR / HUD -->
+    <header class="top-hud">
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+            <div>
+                <h1>ARENA 2D: O ESCOLHIDO</h1>
+                <p>Sobreviva a desastres, proteja-se nos abrigos e invoque seus poderes!</p>
+            </div>
+        </div>
+
+        <!-- Temporizador do Sorteio (1 minuto) -->
+        <div class="raffle-hud">
+            <div class="raffle-label">
+                <span>🎲</span> PRÓXIMO SORTEIO EM: <span id="timerText">60s</span>
+            </div>
+            <div class="progress-container">
+                <div id="timerBar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="hud-actions">
+            <button id="forceRaffleBtn" class="btn-primary" onclick="if(window.game) window.game.forceRaffleNow()">
+                🎲 SORTEAR AGORA
+            </button>
+            <button id="soundToggleBtn" class="btn-secondary" onclick="toggleAudio()">
+                🔊 ÁUDIO: LIGADO
+            </button>
+        </div>
+    </header>
+
+    <!-- PALCO PRINCIPAL DO JOGO -->
+    <main class="main-stage">
+        
+        <!-- WRAPPER DO CANVAS E MODAIS -->
+        <div class="canvas-wrapper">
+            <!-- Canvas Nativo em Alta Resolução -->
+            <canvas id="gameCanvas" width="1200" height="650"></canvas>
+
+            <!-- MODAL 1: ROLETA DE SORTEIO -->
+            <div id="raffleModal" class="modal-overlay hidden">
+                <div class="modal-content gold">
+                    <h2 class="modal-title">🎲 SORTEANDO O ESCOLHIDO...</h2>
+                    <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena?</p>
+                    <div id="raffleCandidate" class="roulette-box">...</div>
+                </div>
+            </div>
+
+            <!-- MODAL 2: CAIXA DE DIGITAÇÃO DO ESCOLHIDO -->
+            <div id="inputModal" class="modal-overlay hidden">
+                <div class="modal-content gold">
+                    <h2 class="modal-title" style="color: #facc15;">🎉 VOCÊ FOI O ESCOLHIDO!</h2>
+                    <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena e atacar todos os jogadores:</p>
+                    
+                    <div class="input-group">
+                        <div class="input-box-wrapper">
+                            <input type="text" id="invocationInput" class="invocation-input" placeholder="Ex: Goku, Chuva de Fogo, Tsunami, Godzilla..." maxlength="40" autocomplete="off">
+                            <div id="inputCountdown" class="input-countdown">15s</div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Atalho Rápido -->
+                    <div class="quick-tags">
+                        <button class="tag-btn" onclick="setQuickInput('Goku')">⚡ Goku</button>
+                        <button class="tag-btn" onclick="setQuickInput('Chuva de Fogo')">🔥 Chuva de Fogo</button>
+                        <button class="tag-btn" onclick="setQuickInput('Tsunami')">🌊 Tsunami</button>
+                        <button class="tag-btn" onclick="setQuickInput('Godzilla')">🦖 Godzilla</button>
+                        <button class="tag-btn" onclick="setQuickInput('Tornado')">🌪️ Tornado</button>
+                        <button class="tag-btn" onclick="setQuickInput('Tempestade de Raios')">⚡ Raios</button>
+                        <button class="tag-btn" onclick="setQuickInput('Nave Alienígena')">🛸 Alien</button>
+                        <button class="tag-btn" onclick="setQuickInput('Bomba Nuclear')">☢️ Bomba Nuclear</button>
+                        <button class="tag-btn" onclick="setQuickInput('Cadeira Voadora')">🪑 Cadeira Voadora</button>
+                        <button class="tag-btn" onclick="setQuickInput('Shrek Gigante')">👹 Shrek</button>
+                    </div>
+
+                    <button id="submitSummonBtn" class="btn-summon" onclick="handleManualSubmit()">
+                        🔥 MATERIALIZAR NA ARENA!
+                    </button>
+                </div>
+            </div>
+
+            <!-- MODAL 3: VITÓRIA OU DERROTA -->
+            <div id="gameOverModal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h2 id="gameOverTitle" class="modal-title">FIM DE JOGO</h2>
+                    <p id="gameOverDesc" class="modal-subtitle">Resultado da partida.</p>
+                    <button class="btn-summon" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="if(window.game) window.game.restartGame()">
+                        🔄 JOGAR NOVAMENTE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAINEL LATERAL (SOBREVIVENTES E REGRAS) -->
+        <aside class="sidebar">
+            
+            <!-- Card de Sobreviventes -->
+            <div class="panel-card">
+                <div class="card-title">
+                    <span>Sobreviventes</span>
+                    <span class="badge" id="aliveCount">6</span>
+                </div>
+                <div id="survivorsList" class="survivors-container">
+                    <!-- Gerado dinamicamente via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Card de Controles e Dicas -->
+            <div class="panel-card">
+                <div class="card-title">
+                    <span>Controles</span>
+                </div>
+                <div class="controls-list">
+                    <div class="control-key">
+                        <span>Andar:</span>
+                        <div><span class="kbd">A</span> <span class="kbd">D</span> ou <span class="kbd">←</span> <span class="kbd">→</span></div>
+                    </div>
+                    <div class="control-key">
+                        <span>Pular:</span>
+                        <div><span class="kbd">W</span> <span class="kbd">↑</span> ou <span class="kbd">Espaço</span></div>
+                    </div>
+                    <div class="control-key">
+                        <span>Esquiva (Dash):</span>
+                        <div><span class="kbd">Shift</span> ou <span class="kbd">E</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Dicas de Sobrevivência -->
+            <div class="panel-card">
+                <div class="card-title">
+                    <span>🛡️ Dicas de Abrigo</span>
+                </div>
+                <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">
+                    <p style="margin-bottom: 6px;">• <strong>Bunkers e Tetos:</strong> Protegem 100% contra Chuva de Fogo, Raios e Meteoros.</p>
+                    <p style="margin-bottom: 6px;">• <strong>Barreiras Verticais:</strong> Protegem contra o <strong>Kamehameha do Goku</strong> e a força da água do <strong>Tsunami</strong>.</p>
+                    <p>• <strong>Qualquer Palavra:</strong> Qualquer coisa digitada ganha vida para atacar!</p>
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <!-- SCRIPTS MODULARES -->
+    <script src="audio.js"></script>
+    <script src="shelters.js"></script>
+    <script src="entities.js"></script>
+    <script src="invocations.js"></script>
+    <script src="game.js"></script>
+
+    <script>
+        // Função para preencher sugestão rápida
+        function setQuickInput(val) {
+            const input = document.getElementById('invocationInput');
+            input.value = val;
+            input.focus();
+        }
+
+        // Envio manual pelo botão
+        function handleManualSubmit() {
+            const input = document.getElementById('invocationInput');
+            if (window.game) {
+                window.game.submitInvocation(input.value);
+            }
+        }
+
+        // Suporte para tecla ENTER no campo de digitação
+        document.getElementById('invocationInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleManualSubmit();
+            }
+        });
+
+        // Alternar áudio
+        function toggleAudio() {
+            if (typeof sounds !== 'undefined') {
+                sounds.enabled = !sounds.enabled;
+                const btn = document.getElementById('soundToggleBtn');
+                btn.textContent = sounds.enabled ? '🔊 ÁUDIO: LIGADO' : '🔇 ÁUDIO: MUTADO';
+            }
+        }
+    </script>
+</body>
+</html>
