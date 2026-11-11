@@ -21,8 +21,10 @@ class Player3D {
         this.isGrounded = true;
         this.facingAngle = 0;
 
-        // Esquiva / Dash
+        // Esquiva / Dash Turbinado
         this.isDodging = false;
+        this.dashTimer = 0;
+        this.dashDirection = new THREE.Vector3();
         this.dodgeCooldown = 0;
         this.invulnerableTimer = 0;
 
@@ -36,7 +38,7 @@ class Player3D {
     }
 
     takeDamage(amount, sourcePos = null) {
-        if (!this.alive || this.isDodging || this.invulnerableTimer > 0) return;
+        if (!this.alive || this.isDodging || this.dashTimer > 0 || this.invulnerableTimer > 0) return;
 
         this.health -= amount;
         this.invulnerableTimer = 20;
@@ -67,18 +69,25 @@ class Player3D {
         }
     }
 
-    dodge() {
+    dodge(targetAngle = null) {
         if (this.dodgeCooldown > 0 || !this.alive) return;
         this.isDodging = true;
-        this.dodgeCooldown = 60;
-        this.invulnerableTimer = 25;
+        this.dashTimer = 18; // 18 frames de propulsão supersônica (~0.3s)
+        this.dodgeCooldown = 32; // ~0.53s de recarga rápida
+        this.invulnerableTimer = 25; // Invulnerável durante o dash
 
-        // Impulso na direção que está olhando
-        this.velocity.x += Math.sin(this.facingAngle) * 0.8;
-        this.velocity.z += Math.cos(this.facingAngle) * 0.8;
+        // Define ângulo e vetor direcional do dash
+        const angle = (targetAngle !== null) ? targetAngle : this.facingAngle;
+        this.facingAngle = angle;
+        this.dashDirection.set(Math.sin(angle), 0, Math.cos(angle)).normalize();
+
+        // Leve impulso vertical para vencer atrito
+        if (this.isGrounded) {
+            this.velocity.y = 0.14;
+            this.isGrounded = false;
+        }
 
         if (sounds) sounds.playDash();
-        setTimeout(() => { this.isDodging = false; }, 300);
     }
 
     updateUI() {
@@ -136,6 +145,28 @@ class Player3D {
         if (this.dodgeCooldown > 0) this.dodgeCooldown--;
         if (this.invulnerableTimer > 0) this.invulnerableTimer--;
 
+        // Execução do Dash Turbinado
+        if (this.dashTimer > 0) {
+            this.dashTimer--;
+            // Velocidade supersônica de impulso (quase 4x mais rápida que a caminhada)
+            this.velocity.x = this.dashDirection.x * 1.45;
+            this.velocity.z = this.dashDirection.z * 1.45;
+
+            // Inclina o personagem para frente durante o dash
+            if (this.mesh) {
+                this.mesh.rotation.x = 0.35;
+            }
+
+            if (this.dashTimer <= 0) {
+                this.isDodging = false;
+                if (this.mesh) this.mesh.rotation.x = 0;
+            }
+        } else {
+            if (this.mesh && this.mesh.rotation.x !== 0) {
+                this.mesh.rotation.x = 0;
+            }
+        }
+
         // Gravidade e Pulo
         this.velocity.y -= this.gravity;
         this.mesh.position.y += this.velocity.y;
@@ -150,9 +181,11 @@ class Player3D {
         this.mesh.position.x += this.velocity.x;
         this.mesh.position.z += this.velocity.z;
 
-        // Fricção do chão
-        this.velocity.x *= 0.82;
-        this.velocity.z *= 0.82;
+        // Fricção do chão (se não estiver no meio do dash)
+        if (this.dashTimer <= 0) {
+            this.velocity.x *= 0.82;
+            this.velocity.z *= 0.82;
+        }
 
         // Rotação suave do personagem para onde está caminhando
         this.mesh.rotation.y = this.facingAngle;
@@ -193,9 +226,9 @@ class Game3D {
         this.humanPlayer = null;
         this.initPlayers();
 
-        // Câmera em Terceira Pessoa
-        this.cameraAngle = { yaw: 0, pitch: 0.35 };
-        this.cameraDistance = 14;
+        // Câmera em Terceira Pessoa (Visão ampla e afastada estilo Roblox)
+        this.cameraAngle = { yaw: 0, pitch: 0.52 };
+        this.cameraDistance = 28;
         this.isDraggingCamera = false;
         this.previousPointerPos = { x: 0, y: 0 };
 
@@ -222,9 +255,9 @@ class Game3D {
     setupThree() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x0f172a);
-        this.scene.fog = new THREE.FogExp2(0x0f172a, 0.008);
+        this.scene.fog = new THREE.FogExp2(0x0f172a, 0.0035);
 
-        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
+        this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.shadowMap.enabled = true;
@@ -271,10 +304,36 @@ class Game3D {
         window.addEventListener('keydown', (e) => {
             if (this.isInputModalOpen) return;
             this.keys[e.code] = true;
-            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+            if (sounds) sounds.ensureContext();
+
+            // Pulo imediato no Espaço
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (this.humanPlayer) this.humanPlayer.jump();
+            }
+
+            // Dash imediato no Shift, Q, E, C ou F
+            if (['ShiftLeft', 'ShiftRight', 'KeyE', 'KeyQ', 'KeyC', 'KeyF'].includes(e.code)) {
+                e.preventDefault();
+                if (this.humanPlayer) {
+                    let moveX = 0, moveZ = 0;
+                    if (this.keys['KeyW'] || this.keys['ArrowUp']) moveZ -= 1;
+                    if (this.keys['KeyS'] || this.keys['ArrowDown']) moveZ += 1;
+                    if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveX -= 1;
+                    if (this.keys['KeyD'] || this.keys['ArrowRight']) moveX += 1;
+
+                    if (moveX !== 0 || moveZ !== 0) {
+                        const angle = Math.atan2(moveX, moveZ) + this.cameraAngle.yaw;
+                        this.humanPlayer.dodge(angle);
+                    } else {
+                        this.humanPlayer.dodge();
+                    }
+                }
+            }
+
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
                 e.preventDefault();
             }
-            if (sounds) sounds.ensureContext();
         });
 
         window.addEventListener('keyup', (e) => {
@@ -307,8 +366,8 @@ class Game3D {
 
         // Zoom da Câmera
         window.addEventListener('wheel', (e) => {
-            this.cameraDistance += e.deltaY * 0.015;
-            this.cameraDistance = Math.max(6, Math.min(28, this.cameraDistance));
+            this.cameraDistance += e.deltaY * 0.02;
+            this.cameraDistance = Math.max(12, Math.min(65, this.cameraDistance));
         });
 
         // ================= TOUCH JOYSTICK 360° PARA CELULAR =================
@@ -384,20 +443,33 @@ class Game3D {
             }, { passive: true });
         }
 
-        // Botões de Ação Mobile
-        if (btnJump) {
-            btnJump.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (this.humanPlayer) this.humanPlayer.jump();
-            }, { passive: false });
-        }
+        // Botões de Ação na Tela (Funciona em Celular no Toque e no PC no Clique!)
+        const setupActionBtn = (btn, action) => {
+            if (!btn) return;
+            const handler = (e) => {
+                if (e && e.cancelable) e.preventDefault();
+                if (sounds) sounds.ensureContext();
+                action();
+            };
+            btn.addEventListener('pointerdown', handler);
+            btn.addEventListener('touchstart', handler, { passive: false });
+        };
 
-        if (btnDash) {
-            btnDash.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (this.humanPlayer) this.humanPlayer.dodge();
-            }, { passive: false });
-        }
+        setupActionBtn(btnJump, () => {
+            if (this.humanPlayer) this.humanPlayer.jump();
+        });
+
+        setupActionBtn(btnDash, () => {
+            if (this.humanPlayer) {
+                // Se estiver usando joystick, da o dash na direção do joystick!
+                if (Math.hypot(this.joystickVector.x, this.joystickVector.y) > 0.1) {
+                    const angle = Math.atan2(this.joystickVector.x, this.joystickVector.y) + this.cameraAngle.yaw;
+                    this.humanPlayer.dodge(angle);
+                } else {
+                    this.humanPlayer.dodge();
+                }
+            }
+        });
     }
 
     updateJoystick(cx, cy, stick, baseCenter) {
@@ -431,6 +503,11 @@ class Game3D {
                 this.triggerRaffle();
             }
         }, 1000);
+    }
+
+    triggerImmediateRaffle() {
+        if (sounds) sounds.ensureContext();
+        this.openHumanInputModal();
     }
 
     forceRaffleNow() {
@@ -500,6 +577,7 @@ class Game3D {
         const timerEl = document.getElementById('inputCountdown');
         timerEl.textContent = `${timeRemaining}s`;
 
+        if (this.inputCountdownInterval) clearInterval(this.inputCountdownInterval);
         this.inputCountdownInterval = setInterval(() => {
             timeRemaining--;
             timerEl.textContent = `${timeRemaining}s`;
@@ -511,13 +589,13 @@ class Game3D {
     }
 
     submitInvocation(text) {
-        if (!this.isInputModalOpen) return;
-        clearInterval(this.inputCountdownInterval);
+        if (this.inputCountdownInterval) clearInterval(this.inputCountdownInterval);
         this.isInputModalOpen = false;
-        document.getElementById('inputModal').classList.add('hidden');
+        const modal = document.getElementById('inputModal');
+        if (modal) modal.classList.add('hidden');
 
         const chosenText = (text && text.trim().length > 0) ? text.trim() : 'Goku';
-        this.threatManager.invoke(chosenText, this.humanPlayer.name);
+        this.threatManager.invoke(chosenText, this.humanPlayer ? this.humanPlayer.name : 'Você (P1)');
     }
 
     executeBotInvocation(bot) {
@@ -609,18 +687,22 @@ class Game3D {
                 moveZ = this.joystickVector.y;
             }
 
-            if (moveX !== 0 || moveZ !== 0) {
-                // Converte vetor de movimento para o espaço da Câmera
-                const angle = Math.atan2(moveX, moveZ);
-                const worldAngle = angle + this.cameraAngle.yaw;
+            const hasMove = (moveX !== 0 || moveZ !== 0);
 
-                this.humanPlayer.velocity.x = Math.sin(worldAngle) * this.humanPlayer.speed;
-                this.humanPlayer.velocity.z = Math.cos(worldAngle) * this.humanPlayer.speed;
-                this.humanPlayer.facingAngle = worldAngle;
+            // Apenas aplica velocidade normal de caminhada se NÃO estiver em Dash ativo!
+            if (this.humanPlayer.dashTimer <= 0) {
+                if (hasMove) {
+                    // Converte vetor de movimento para o espaço da Câmera
+                    const angle = Math.atan2(moveX, moveZ);
+                    const worldAngle = angle + this.cameraAngle.yaw;
+
+                    this.humanPlayer.velocity.x = Math.sin(worldAngle) * this.humanPlayer.speed;
+                    this.humanPlayer.velocity.z = Math.cos(worldAngle) * this.humanPlayer.speed;
+                    this.humanPlayer.facingAngle = worldAngle;
+                }
             }
 
             if (this.keys['Space']) this.humanPlayer.jump();
-            if (this.keys['ShiftLeft'] || this.keys['ShiftRight'] || this.keys['KeyE']) this.humanPlayer.dodge();
         }
 
         // 2. Atualiza Bots

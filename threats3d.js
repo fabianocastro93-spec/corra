@@ -84,17 +84,25 @@ class ThreatManager3D {
             this.initGoku();
         } else if (info.type === 'godzilla') {
             this.initGodzilla();
-        } else if (info.type === 'procedural') {
-            this.initProceduralBoss(info.raw);
+        } else if (info.type === 'nuke') {
+            this.initNuke();
+        } else if (info.type === 'fire_rain') {
+            this.initFireRain();
+        } else if (info.type === 'tsunami') {
+            this.initTsunami();
+        } else if (info.type === 'tornado') {
+            this.initTornado();
         } else if (info.type === 'alien') {
             this.initAlien();
+        } else {
+            this.initProceduralBoss(info.raw);
         }
     }
 
-    // Inicializa Goku 3D
+    // 1. Inicializa Goku 3D (Hoverando na altura ideal em frente à arena)
     initGoku() {
         const goku = robloxFactory.createRobloxGoku();
-        goku.position.set(0, 14, 0);
+        goku.position.set(0, 8, -14);
         this.scene.add(goku);
         this.activeThreat.bossMesh = goku;
 
@@ -122,16 +130,62 @@ class ThreatManager3D {
         this.activeThreat.kamehamehaBeam = beamMesh;
     }
 
-    // Inicializa Godzilla 3D
+    // 2. Inicializa Godzilla 3D Titânico bem na frente dos jogadores
     initGodzilla() {
-        const gz = robloxFactory.createRobloxAvatar(0x1e293b, 0x0f172a, 0x1e293b, '🦖 GODZILLA TITÂNICO', false);
-        gz.scale.set(4.5, 4.5, 4.5);
-        gz.position.set(-65, 0, -65);
+        const gz = robloxFactory.createRobloxGodzilla();
+        gz.position.set(0, 0, -32);
+        gz.rotation.y = 0; // Olhando de frente para os jogadores
         this.scene.add(gz);
         this.activeThreat.bossMesh = gz;
     }
 
-    // Inicializa Nave Alienígena 3D
+    // 3. Inicializa Bomba Nuclear 3D caindo lentamente do céu com alerta
+    initNuke() {
+        const nuke = robloxFactory.createNuclearBomb();
+        nuke.position.set(0, 75, 0);
+        this.scene.add(nuke);
+        this.activeThreat.bossMesh = nuke;
+        this.activeThreat.hasDetonated = false;
+    }
+
+    // 4. Inicializa Chuva de Meteoros 3D
+    initFireRain() {
+        // Criada dinamicamente no updateFireRain
+    }
+
+    // 5. Inicializa Tsunami 3D
+    initTsunami() {
+        const waveGeo = new THREE.BoxGeometry(160, 12, 5);
+        const waveMat = new THREE.MeshStandardMaterial({
+            color: 0x0284c7,
+            transparent: true,
+            opacity: 0.8,
+            roughness: 0.1
+        });
+        const wave = new THREE.Mesh(waveGeo, waveMat);
+
+        // Crista de espuma branca no topo da onda
+        const foamGeo = new THREE.BoxGeometry(160, 1.5, 5.5);
+        const foamMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const foam = new THREE.Mesh(foamGeo, foamMat);
+        foam.position.y = 6.0;
+        wave.add(foam);
+
+        wave.position.set(0, 6, -75);
+        this.scene.add(wave);
+        this.activeThreat.waveMesh = wave;
+        if (sounds) sounds.playWaterSplash();
+    }
+
+    // 6. Inicializa Tornado 3D
+    initTornado() {
+        const tornado = robloxFactory.createTornadoGroup();
+        tornado.position.set(0, 0, -20);
+        this.scene.add(tornado);
+        this.activeThreat.bossMesh = tornado;
+    }
+
+    // 7. Inicializa Nave Alienígena 3D
     initAlien() {
         const ufoGroup = new THREE.Group();
         const diskGeo = new THREE.CylinderGeometry(5, 7, 1.5, 16);
@@ -145,15 +199,15 @@ class ThreatManager3D {
         dome.position.y = 0.75;
         ufoGroup.add(dome);
 
-        ufoGroup.position.set(0, 18, 0);
+        ufoGroup.position.set(0, 14, -15);
         this.scene.add(ufoGroup);
         this.activeThreat.bossMesh = ufoGroup;
     }
 
-    // Inicializa Boss Procedural 3D para qualquer palavra livre
+    // 8. Inicializa Boss Procedural 3D para qualquer palavra livre (bem na frente e na altura dos olhos)
     initProceduralBoss(word) {
         const boss = robloxFactory.createProceduralRobloxBoss(word);
-        boss.position.set(0, 12, 0);
+        boss.position.set(0, 3.5, -18);
         this.scene.add(boss);
         this.activeThreat.bossMesh = boss;
     }
@@ -197,6 +251,8 @@ class ThreatManager3D {
             this.updateAlien(threat, players, world3d);
         } else if (threat.type === 'nuke') {
             this.updateNuke(threat, players, world3d, onScreenShake);
+        } else if (threat.type === 'tornado') {
+            this.updateTornado(threat, players, world3d, onScreenShake);
         } else if (threat.type === 'procedural') {
             this.updateProceduralBoss(threat, players, world3d, onScreenShake);
         }
@@ -359,30 +415,94 @@ class ThreatManager3D {
         }
     }
 
-    // Lógica do Godzilla 3D
+    // Lógica do Godzilla 3D (Caminha, ruge, treme o chão e dispara Sopro Atômico)
     updateGodzilla(threat, players, world3d, onScreenShake) {
         const gz = threat.bossMesh;
+        if (!gz) return;
         threat.actionTimer++;
 
-        if (threat.actionTimer % 240 === 0) {
-            if (onScreenShake) onScreenShake(14);
-            if (sounds) sounds.playExplosion();
+        const living = players.filter(p => p.alive);
+        const target = living.find(p => p.isHuman) || living[0] || null;
 
-            players.forEach(p => {
-                if (p.alive && p.mesh.position.y < 0.2 && !world3d.isInsideBunker(p.mesh.position)) {
-                    p.takeDamage(25, gz.position);
+        // 1. Caminhada em direção ao alvo
+        if (target) {
+            const toTarget = new THREE.Vector3().subVectors(target.mesh.position, gz.position);
+            toTarget.y = 0;
+            const dist = toTarget.length();
+
+            if (dist > 8) {
+                toTarget.normalize();
+                gz.position.addScaledVector(toTarget, 0.12);
+                gz.rotation.y = Math.atan2(toTarget.x, toTarget.z);
+            }
+        }
+
+        // Animação de caminhada (pernas, braços e cauda)
+        const walkCycle = Math.sin(threat.actionTimer * 0.12);
+        if (gz.parts.leftLegGroup) gz.parts.leftLegGroup.rotation.x = walkCycle * 0.5;
+        if (gz.parts.rightLegGroup) gz.parts.rightLegGroup.rotation.x = -walkCycle * 0.5;
+        if (gz.parts.leftArmGroup) gz.parts.leftArmGroup.rotation.x = -walkCycle * 0.35;
+        if (gz.parts.rightArmGroup) gz.parts.rightArmGroup.rotation.x = walkCycle * 0.35;
+        if (gz.parts.tailGroup) gz.parts.tailGroup.rotation.y = Math.sin(threat.actionTimer * 0.08) * 0.3;
+
+        // Passos pesados que tremem o chão
+        if (threat.actionTimer % 35 === 0) {
+            if (onScreenShake) onScreenShake(4);
+            if (sounds) sounds.playHit();
+        }
+
+        // Ciclo do Sopro Atômico (a cada 200 frames)
+        const cycle = threat.actionTimer % 200;
+
+        // Carregamento de energia nas placas dorsais (azul neon brilhante)
+        if (cycle >= 120 && cycle < 160) {
+            if (gz.parts.dorsalSpikes) {
+                const pulse = 1.0 + Math.sin(threat.actionTimer * 0.4) * 0.8;
+                gz.parts.dorsalSpikes.forEach(s => s.material.emissiveIntensity = pulse * 1.5);
+            }
+            if (cycle === 120 && sounds) sounds.playChargeEnergy(1.2);
+        } else if (cycle >= 160 && cycle < 200) {
+            // DISPARO DO SOPRO ATÔMICO
+            if (gz.parts.breathMesh) gz.parts.breathMesh.visible = true;
+            gz.rotation.y += Math.sin(threat.actionTimer * 0.06) * 0.02;
+
+            if (threat.actionTimer % 6 === 0) {
+                if (onScreenShake) onScreenShake(7);
+                if (sounds) sounds.playKamehamehaBlast();
+            }
+
+            // Dano a qualquer jogador na direção do raio
+            const breathDir = new THREE.Vector3(0, 0, 1).applyEuler(gz.rotation);
+            living.forEach(p => {
+                const toP = new THREE.Vector3().subVectors(p.mesh.position, gz.position);
+                const dist = toP.length();
+                if (dist < 85) {
+                    toP.normalize();
+                    if (breathDir.dot(toP) > 0.85) {
+                        const isSafe = world3d.isInsideBunker(p.mesh.position) || world3d.isProtectedFromThreat(p.mesh.position, gz.position);
+                        if (!isSafe) {
+                            p.takeDamage(1.8, gz.position);
+                        }
+                    }
                 }
             });
+        } else {
+            if (gz.parts.breathMesh) gz.parts.breathMesh.visible = false;
+            if (gz.parts.dorsalSpikes) {
+                gz.parts.dorsalSpikes.forEach(s => s.material.emissiveIntensity = 0.5);
+            }
         }
     }
 
     // Lógica da Nave Alienígena 3D
     updateAlien(threat, players, world3d) {
         const ufo = threat.bossMesh;
+        if (!ufo) return;
         threat.actionTimer++;
 
         ufo.position.x = Math.sin(threat.actionTimer * 0.02) * 40;
         ufo.position.z = Math.cos(threat.actionTimer * 0.02) * 40;
+        ufo.rotation.y += 0.05;
 
         if (threat.actionTimer % 45 === 0) {
             const living = players.filter(p => p.alive);
@@ -400,46 +520,129 @@ class ThreatManager3D {
         }
     }
 
-    // Lógica da Bomba Nuclear 3D
+    // Lógica da Bomba Nuclear 3D (Desce do céu, toca alarme e gera cogumelo de fogo titânico)
     updateNuke(threat, players, world3d, onScreenShake) {
+        const nuke = threat.bossMesh;
         threat.actionTimer++;
-        const remainingFrames = threat.maxDuration - threat.actionTimer;
 
-        if (remainingFrames === 60) {
-            if (onScreenShake) onScreenShake(25);
-            if (sounds) sounds.playExplosion();
+        if (nuke && !threat.hasDetonated) {
+            // Desce gradualmente do céu em direção ao chão
+            nuke.position.y -= 0.28;
+            nuke.rotation.y += 0.03;
 
-            players.forEach(p => {
-                if (!p.alive) return;
-                if (!world3d.isInsideBunker(p.mesh.position)) {
-                    p.takeDamage(75, new THREE.Vector3(0, 0, 0));
-                }
-            });
+            // Alerta sonoro periódico
+            if (threat.actionTimer % 60 === 0 && sounds) {
+                sounds.playAlert();
+            }
+
+            // Impacto no chão -> DETONAÇÃO NUCLEAR!
+            if (nuke.position.y <= 1.2) {
+                threat.hasDetonated = true;
+                nuke.visible = false;
+
+                // Cria esfera de bola de fogo nuclear titânica
+                const fireballGeo = new THREE.SphereGeometry(3, 24, 24);
+                const fireballMat = new THREE.MeshBasicMaterial({
+                    color: 0xff3b00,
+                    transparent: true,
+                    opacity: 0.95
+                });
+                const fireball = new THREE.Mesh(fireballGeo, fireballMat);
+                fireball.position.set(nuke.position.x, 2, nuke.position.z);
+                this.scene.add(fireball);
+                threat.fireballMesh = fireball;
+
+                if (onScreenShake) onScreenShake(30);
+                if (sounds) sounds.playExplosion();
+
+                // Dano massivo a todos fora dos Bunkers
+                players.forEach(p => {
+                    if (p.alive && !world3d.isInsideBunker(p.mesh.position)) {
+                        p.takeDamage(85, fireball.position);
+                    }
+                });
+            }
+        }
+
+        // Expansão da onda de choque de fogo
+        if (threat.fireballMesh) {
+            threat.fireballMesh.scale.addScalar(0.9);
+            threat.fireballMesh.material.opacity *= 0.95;
+            if (threat.fireballMesh.scale.x > 35) {
+                this.scene.remove(threat.fireballMesh);
+                threat.fireballMesh = null;
+            }
         }
     }
 
-    // Lógica do Boss Procedural 3D
-    updateProceduralBoss(threat, players, world3d, onScreenShake) {
-        const b = threat.bossMesh;
+    // Lógica do Tornado 3D (Vórtice giratório de blocos)
+    updateTornado(threat, players, world3d, onScreenShake) {
+        const tornado = threat.bossMesh;
+        if (!tornado) return;
         threat.actionTimer++;
 
-        b.position.x = Math.sin(threat.actionTimer * 0.03) * 35;
-        b.position.z = Math.cos(threat.actionTimer * 0.03) * 35;
-        b.position.y = 10 + Math.sin(threat.actionTimer * 0.05) * 2;
+        // Movimento circular pelo mapa
+        tornado.position.x = Math.sin(threat.actionTimer * 0.015) * 36;
+        tornado.position.z = Math.cos(threat.actionTimer * 0.015) * 36;
 
-        if (threat.actionTimer % 40 === 0) {
-            const living = players.filter(p => p.alive);
-            const target = living[Math.floor(Math.random() * living.length)];
-            if (target) {
-                const orbGeo = new THREE.SphereGeometry(1.0, 10, 10);
-                const orbMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
-                const orb = new THREE.Mesh(orbGeo, orbMat);
-                orb.position.copy(b.position);
+        // Rotação dos blocos do vórtice
+        if (tornado.blocks) {
+            tornado.blocks.forEach(b => {
+                b.userData.angle += b.userData.speed;
+                const r = b.userData.baseRadius + Math.sin(threat.actionTimer * 0.05 + b.userData.layer) * 0.4;
+                b.position.x = Math.cos(b.userData.angle) * r;
+                b.position.z = Math.sin(b.userData.angle) * r;
+                b.rotation.x += 0.04;
+                b.rotation.y += 0.04;
+            });
+        }
 
-                const dir = new THREE.Vector3().subVectors(target.mesh.position, b.position).normalize();
-                this.addProjectile(orb, dir.multiplyScalar(0.85), 18, 'procedural_orb');
-                if (sounds) sounds.playJump();
+        if (threat.actionTimer % 20 === 0 && onScreenShake) {
+            onScreenShake(2);
+        }
+
+        // Puxa e arremessa jogadores desprotegidos
+        players.forEach(p => {
+            if (!p.alive) return;
+            const dist = p.mesh.position.distanceTo(tornado.position);
+            if (dist < 14 && !world3d.isInsideBunker(p.mesh.position)) {
+                p.takeDamage(0.8, tornado.position);
+                p.velocity.y = 0.35; // Arremessa para o alto
+                const pullDir = new THREE.Vector3().subVectors(tornado.position, p.mesh.position).normalize();
+                p.velocity.x += pullDir.x * 0.15;
+                p.velocity.z += pullDir.z * 0.15;
             }
+        });
+    }
+
+    // Lógica do Boss Procedural 3D para qualquer palavra livre digitada
+    updateProceduralBoss(threat, players, world3d, onScreenShake) {
+        const b = threat.bossMesh;
+        if (!b) return;
+        threat.actionTimer++;
+
+        // Movimento suave a nível dos olhos (y = 3.5 a 4.5)
+        b.position.x = Math.sin(threat.actionTimer * 0.025) * 30;
+        b.position.z = Math.cos(threat.actionTimer * 0.025) * 30;
+        b.position.y = 3.5 + Math.sin(threat.actionTimer * 0.04) * 1.0;
+
+        const living = players.filter(p => p.alive);
+        const target = living.find(p => p.isHuman) || living[0] || null;
+        if (target) {
+            b.lookAt(target.mesh.position.x, b.position.y, target.mesh.position.z);
+        }
+
+        // Disparo de esferas de energia mágicas
+        if (threat.actionTimer % 40 === 0 && living.length > 0) {
+            const randTarget = living[Math.floor(Math.random() * living.length)];
+            const orbGeo = new THREE.SphereGeometry(1.2, 12, 12);
+            const orbMat = new THREE.MeshBasicMaterial({ color: 0xf43f5e });
+            const orb = new THREE.Mesh(orbGeo, orbMat);
+            orb.position.copy(b.position);
+
+            const dir = new THREE.Vector3().subVectors(randTarget.mesh.position, b.position).normalize();
+            this.addProjectile(orb, dir.multiplyScalar(0.75), 18, 'procedural_orb');
+            if (sounds) sounds.playJump();
         }
     }
 
@@ -489,6 +692,9 @@ class ThreatManager3D {
         }
         if (this.activeThreat.waveMesh) {
             this.scene.remove(this.activeThreat.waveMesh);
+        }
+        if (this.activeThreat.fireballMesh) {
+            this.scene.remove(this.activeThreat.fireballMesh);
         }
 
         this.projectiles.forEach(p => this.scene.remove(p));

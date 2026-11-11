@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Arena Sobrevivência 3D - Estilo Roblox</title>
-    <link rel="stylesheet" href="style.css?v=3.5.1">
+    <link rel="stylesheet" href="style.css?v=3.6.1">
     <!-- Three.js Library via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -147,7 +147,7 @@
                     <span class="hint-pill">W</span> <span class="hint-pill">A</span> <span class="hint-pill">S</span> <span class="hint-pill">D</span> Mover 360° |
                     <span class="hint-pill">Mouse</span> Câmera |
                     <span class="hint-pill">Espaço</span> Pulo |
-                    <span class="hint-pill">Shift</span> Dash
+                    <span class="hint-pill">Shift / Q / E</span> Dash Turbinado
                 </div>
                 <div class="hint-group">
                     <strong>Celular:</strong> 
@@ -187,17 +187,17 @@
     </main>
 
     <!-- SCRIPTS MODULARES DO JOGO 3D -->
-    <script src="audio.js?v=3.5.1"></script>
-    <script src="roblox_model.js?v=3.5.1"></script>
-    <script src="world3d.js?v=3.5.1"></script>
-    <script src="threats3d.js?v=3.5.1"></script>
-    <script src="game3d.js?v=3.5.1"></script>
+    <script src="audio.js?v=3.6.1"></script>
+    <script src="roblox_model.js?v=3.6.1"></script>
+    <script src="world3d.js?v=3.6.1"></script>
+    <script src="threats3d.js?v=3.6.1"></script>
+    <script src="game3d.js?v=3.6.1"></script>
 
     <script>
         function setQuickInput(val) {
             const input = document.getElementById('invocationInput');
             input.value = val;
-            input.focus();
+            handleManualSubmit();
         }
 
         function handleManualSubmit() {

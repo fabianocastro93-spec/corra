@@ -321,6 +321,212 @@ class RobloxModelFactory {
 
         return boss;
     }
+
+    // Constrói Godzilla Roblox Titânico 3D com placas dorsais brilhantes e sopro atômico
+    createRobloxGodzilla() {
+        const root = new THREE.Group();
+        const matBody = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+        const matEye = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+        const matDorsal = new THREE.MeshStandardMaterial({
+            color: 0x00f0ff,
+            emissive: 0x00e5ff,
+            emissiveIntensity: 0.8
+        });
+
+        // 1. Torso Robusto
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.8, 2.8), matBody);
+        torso.position.y = 4.2;
+        root.add(torso);
+
+        // 2. Cabeça com Focinho e Mandíbula
+        const headGroup = new THREE.Group();
+        headGroup.position.set(0, 7.2, 0.6);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.0, 2.4), matBody);
+        headGroup.add(head);
+
+        const snout = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), matBody);
+        snout.position.set(0, -0.2, 1.6);
+        headGroup.add(snout);
+
+        // Olhos Vermelhos Aterrorizantes
+        const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.2), matEye);
+        eyeL.position.set(-1.0, 0.4, 1.2);
+        headGroup.add(eyeL);
+
+        const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.2), matEye);
+        eyeR.position.set(1.0, 0.4, 1.2);
+        headGroup.add(eyeR);
+
+        root.add(headGroup);
+
+        // 3. Placas Dorsais Espinhosas Azuis (Costas)
+        const dorsalSpikes = [];
+        for (let i = 0; i < 5; i++) {
+            const size = 1.0 - Math.abs(i - 2) * 0.18;
+            const spike = new THREE.Mesh(new THREE.ConeGeometry(size * 0.7, size * 2.2, 4), matDorsal);
+            spike.rotation.x = -Math.PI / 3;
+            spike.position.set(0, 2.5 + i * 1.0, -1.6 - (i === 2 ? 0.3 : 0));
+            root.add(spike);
+            dorsalSpikes.push(spike);
+        }
+
+        // 4. Cauda Longa Curvada
+        const tailGroup = new THREE.Group();
+        tailGroup.position.set(0, 2.2, -1.4);
+        for (let i = 0; i < 5; i++) {
+            const seg = new THREE.Mesh(new THREE.BoxGeometry(1.8 - i * 0.3, 1.4 - i * 0.2, 2.2), matBody);
+            seg.position.set(0, i * 0.4, -i * 1.8);
+            tailGroup.add(seg);
+        }
+        root.add(tailGroup);
+
+        // 5. Pernas Articuladas para Animação de Caminhada
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+        const leftLegGroup = new THREE.Group();
+        leftLegGroup.position.set(-1.6, 2.4, 0);
+        const lLeg = new THREE.Mesh(new THREE.BoxGeometry(1.5, 3.2, 1.8), legMat);
+        lLeg.position.y = -1.6;
+        leftLegGroup.add(lLeg);
+        root.add(leftLegGroup);
+
+        const rightLegGroup = new THREE.Group();
+        rightLegGroup.position.set(1.6, 2.4, 0);
+        const rLeg = new THREE.Mesh(new THREE.BoxGeometry(1.5, 3.2, 1.8), legMat);
+        rLeg.position.y = -1.6;
+        rightLegGroup.add(rLeg);
+        root.add(rightLegGroup);
+
+        // 6. Braços Articulados
+        const leftArmGroup = new THREE.Group();
+        leftArmGroup.position.set(-2.2, 5.2, 0.4);
+        const lArm = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.4, 1.1), matBody);
+        lArm.position.y = -1.2;
+        leftArmGroup.add(lArm);
+        root.add(leftArmGroup);
+
+        const rightArmGroup = new THREE.Group();
+        rightArmGroup.position.set(2.2, 5.2, 0.4);
+        const rArm = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.4, 1.1), matBody);
+        rArm.position.y = -1.2;
+        rightArmGroup.add(rArm);
+        root.add(rightArmGroup);
+
+        // 7. Feixe do Sopro Atômico (Cilindro de Energia Cyan)
+        const breathGeo = new THREE.CylinderGeometry(1.5, 0.3, 90, 16);
+        breathGeo.rotateX(Math.PI / 2);
+        breathGeo.translate(0, 0, 45);
+        const breathMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.85 });
+        const breathMesh = new THREE.Mesh(breathGeo, breathMat);
+        breathMesh.position.set(0, 7.0, 2.5);
+        breathMesh.visible = false;
+        root.add(breathMesh);
+
+        // Billboard do Godzilla
+        const billboard = this.createBillboardUI('🦖 GODZILLA TITÂNICO', false);
+        billboard.position.y = 9.8;
+        root.add(billboard);
+
+        root.parts = {
+            torso, headGroup, dorsalSpikes, tailGroup,
+            leftLegGroup, rightLegGroup, leftArmGroup, rightArmGroup,
+            breathMesh, billboard
+        };
+
+        root.scale.set(1.8, 1.8, 1.8);
+        return root;
+    }
+
+    // Constrói Míssil Nuclear 3D que desce do céu com faixas de perigo
+    createNuclearBomb() {
+        const root = new THREE.Group();
+
+        // Corpo do foguete (Cilindro Verde Militar / Amarelo de Perigo)
+        const bodyGeo = new THREE.CylinderGeometry(1.6, 1.6, 10, 16);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, metalness: 0.7, roughness: 0.3 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        root.add(body);
+
+        // Faixa amarela de radiação
+        const bandGeo = new THREE.CylinderGeometry(1.62, 1.62, 2.5, 16);
+        const bandMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.2 });
+        const band = new THREE.Mesh(bandGeo, bandMat);
+        band.position.y = 1.0;
+        root.add(band);
+
+        // Ogiva Cônica (Ponta da bomba)
+        const noseGeo = new THREE.ConeGeometry(1.6, 3.8, 16);
+        const noseMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.5 });
+        const nose = new THREE.Mesh(noseGeo, noseMat);
+        nose.position.y = -6.8;
+        nose.rotation.x = Math.PI; // Apontando para o chão
+        root.add(nose);
+
+        // Aletas de estabilização traseiras
+        const finMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
+        for (let i = 0; i < 4; i++) {
+            const fin = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.8, 2.2), finMat);
+            fin.rotation.y = (i * Math.PI) / 2;
+            fin.position.set(0, 4.2, 0);
+            fin.position.x = Math.cos((i * Math.PI) / 2) * 1.4;
+            fin.position.z = Math.sin((i * Math.PI) / 2) * 1.4;
+            root.add(fin);
+        }
+
+        // Fogo Propulsor no topo
+        const fireGeo = new THREE.ConeGeometry(1.4, 4.0, 12);
+        const fireMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
+        const fire = new THREE.Mesh(fireGeo, fireMat);
+        fire.position.y = 6.8;
+        root.add(fire);
+
+        // Luz de alerta vermelha pulsante
+        const alertLight = new THREE.PointLight(0xef4444, 4, 35);
+        alertLight.position.set(0, -7.0, 0);
+        root.add(alertLight);
+
+        // Placa Flutuante
+        const billboard = this.createBillboardUI('☢️ BOMBA NUCLEAR', false);
+        billboard.position.y = 12.0;
+        root.add(billboard);
+
+        root.parts = { body, nose, fire, alertLight, billboard };
+        return root;
+    }
+
+    // Constrói Funil de Tornado 3D com múltiplos blocos giratórios
+    createTornadoGroup() {
+        const root = new THREE.Group();
+        const blockGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        const blockMat = new THREE.MeshStandardMaterial({
+            color: 0x94a3b8,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const blocks = [];
+        const layers = 9;
+        for (let layer = 0; layer < layers; layer++) {
+            const radius = 1.5 + layer * 1.2;
+            const y = layer * 2.8;
+            const count = 4 + layer * 2;
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2;
+                const mesh = new THREE.Mesh(blockGeo, blockMat);
+                mesh.userData = { layer, baseRadius: radius, angle, speed: 0.04 + layer * 0.01 };
+                mesh.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+                root.add(mesh);
+                blocks.push(mesh);
+            }
+        }
+
+        const billboard = this.createBillboardUI('🌪️ TORNADO DEVASTADOR', false);
+        billboard.position.y = 28;
+        root.add(billboard);
+
+        root.blocks = blocks;
+        root.billboard = billboard;
+        return root;
+    }
 }
 
 const robloxFactory = new RobloxModelFactory();
