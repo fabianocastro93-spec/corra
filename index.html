@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Arena Sobrevivência 3D - Estilo Roblox</title>
-    <link rel="stylesheet" href="style.css?v=3.5.0">
+    <link rel="stylesheet" href="style.css?v=3.5.1">
     <!-- Three.js Library via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -55,18 +55,11 @@
                 <!-- 1. BARRA HUD FIXA DE AMEAÇA ATIVA NO TOPO DO JOGO -->
                 <div id="threatHudBar" class="threat-hud-bar hidden">
                     <span class="threat-pulse-dot"></span>
-                    <span id="threatHudName" class="threat-hud-title">AMEAÇA: GOKU</span>
+                    <span id="threatHudName" class="threat-hud-title">AMEAÇA: NENHUMA</span>
                     <span class="threat-divider">|</span>
-                    <span id="threatHudAuthor" class="threat-hud-author">Por: Você</span>
+                    <span id="threatHudAuthor" class="threat-hud-author"></span>
                     <span class="threat-divider">|</span>
-                    <span id="threatHudCountdown" class="threat-hud-timer">18s</span>
-                </div>
-
-                <!-- 2. POPUP GIGANTE DE NOTIFICAÇÃO DE O QUE FOI ESCOLHIDO -->
-                <div id="summonBigBanner" class="summon-big-banner hidden">
-                    <div class="summon-badge">🚨 NOVA INVOCAÇÃO NA ARENA! 🚨</div>
-                    <div id="summonNameDisplay" class="summon-title">GOKU (SUPER SAIYAJIN)</div>
-                    <div id="summonAuthorDisplay" class="summon-author">Invocado por: Você (P1)</div>
+                    <span id="threatHudCountdown" class="threat-hud-timer">0s</span>
                 </div>
 
                 <!-- 3. CONTROLES TOUCH MOBILE (JOYSTICK 360° + ROTAÇÃO DE CÂMERA) -->
@@ -194,11 +187,11 @@
     </main>
 
     <!-- SCRIPTS MODULARES DO JOGO 3D -->
-    <script src="audio.js?v=3.5.0"></script>
-    <script src="roblox_model.js?v=3.5.0"></script>
-    <script src="world3d.js?v=3.5.0"></script>
-    <script src="threats3d.js?v=3.5.0"></script>
-    <script src="game3d.js?v=3.5.0"></script>
+    <script src="audio.js?v=3.5.1"></script>
+    <script src="roblox_model.js?v=3.5.1"></script>
+    <script src="world3d.js?v=3.5.1"></script>
+    <script src="threats3d.js?v=3.5.1"></script>
+    <script src="game3d.js?v=3.5.1"></script>
 
     <script>
         function setQuickInput(val) {

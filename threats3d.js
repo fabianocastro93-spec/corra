@@ -9,10 +9,6 @@ class ThreatManager3D {
         this.announcements = [];
 
         // Elementos visuais do HUD
-        this.bigBannerEl = document.getElementById('summonBigBanner');
-        this.bannerTitleEl = document.getElementById('summonNameDisplay');
-        this.bannerAuthorEl = document.getElementById('summonAuthorDisplay');
-
         this.hudBarEl = document.getElementById('threatHudBar');
         this.hudNameEl = document.getElementById('threatHudName');
         this.hudAuthorEl = document.getElementById('threatHudAuthor');
@@ -53,7 +49,7 @@ class ThreatManager3D {
         };
     }
 
-    // Invoca a ameaça 3D e MOSTRA CLARAMENTE NA TELA O QUE FOI ESCOLHIDO!
+    // Invoca a ameaça 3D
     invoke(rawText, playerName) {
         this.cleanup();
 
@@ -75,20 +71,7 @@ class ThreatManager3D {
 
         if (sounds) sounds.playAlert();
 
-        // 1. ATUALIZA E EXIBE O POPUP GIGANTE DO QUE FOI ESCOLHIDO
-        if (this.bigBannerEl && this.bannerTitleEl && this.bannerAuthorEl) {
-            this.bannerTitleEl.textContent = info.name.toUpperCase();
-            this.bannerAuthorEl.textContent = `Invocado por: ${playerName}`;
-            this.bigBannerEl.classList.remove('hidden');
-
-            // Esconde o popup gigante após 4 segundos
-            clearTimeout(this.bannerTimeout);
-            this.bannerTimeout = setTimeout(() => {
-                if (this.bigBannerEl) this.bigBannerEl.classList.add('hidden');
-            }, 4000);
-        }
-
-        // 2. ATUALIZA E EXIBE A BARRA HUD PERSISTENTE DE AMEAÇA
+        // Atualiza e exibe a barra HUD compacta de ameaça no topo da tela
         if (this.hudBarEl && this.hudNameEl && this.hudAuthorEl && this.hudTimerEl) {
             this.hudNameEl.textContent = `AMEAÇA: ${info.name.toUpperCase()}`;
             this.hudAuthorEl.textContent = `Por: ${playerName}`;
@@ -495,7 +478,6 @@ class ThreatManager3D {
 
     cleanup() {
         if (this.hudBarEl) this.hudBarEl.classList.add('hidden');
-        if (this.bigBannerEl) this.bigBannerEl.classList.add('hidden');
 
         if (!this.activeThreat) return;
 
