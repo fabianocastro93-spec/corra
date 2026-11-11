@@ -45,7 +45,7 @@ class Player {
 
         // IA dos Bots
         this.aiTargetX = this.x;
-        this.aiState = 'wander'; // 'wander', 'flee_to_shelter', 'cower'
+        this.aiState = 'wander';
         this.aiDecisionTimer = Math.random() * 60;
         this.aiTargetShelter = null;
     }
@@ -55,7 +55,7 @@ class Player {
         if (!this.alive || this.isDodging || this.invulnerableTimer > 0) return false;
 
         this.health -= amount;
-        this.invulnerableTimer = 20; // 0.3s de imunidade
+        this.invulnerableTimer = 20;
 
         if (sounds) sounds.playHit();
 
@@ -74,7 +74,7 @@ class Player {
         return true;
     }
 
-    // Ação de esquiva / Dash (desvia de ataques e fica invulnerável por um instante)
+    // Ação de esquiva / Dash
     dodge(dir = 1) {
         if (this.dodgeCooldown > 0 || !this.alive) return;
         this.isDodging = true;
@@ -101,8 +101,8 @@ class Player {
         this.aiDecisionTimer--;
 
         // Se há uma ameaça ativa atacando a arena
-        if (activeThreat && activeThreat.isActive) {
-            const preferRoof = activeThreat.type === 'sky_hazard' || activeThreat.name.toLowerCase().includes('fogo') || activeThreat.name.toLowerCase().includes('meteoro') || activeThreat.name.toLowerCase().includes('raio');
+        if (activeThreat && (activeThreat.isActive || activeThreat.duration > 0)) {
+            const preferRoof = activeThreat.type === 'fire_rain' || activeThreat.name.toLowerCase().includes('fogo') || activeThreat.name.toLowerCase().includes('meteoro') || activeThreat.name.toLowerCase().includes('raio');
             
             // Busca o melhor abrigo
             if (!this.aiTargetShelter || this.aiDecisionTimer <= 0) {
@@ -118,17 +118,15 @@ class Player {
                     this.vx = (diff > 0 ? 1 : -1) * (this.speed * 1.15);
                     this.facing = diff > 0 ? 1 : -1;
 
-                    // Pula se encontrar uma parede bloqueando ou se precisar subir em plataforma
                     if (this.isGrounded && (Math.random() < 0.05 || Math.abs(this.vx) < 0.5)) {
                         this.jump();
                     }
                 } else {
-                    // Já está no abrigo! Permanece agachado/protegido
                     this.vx *= 0.5;
                 }
             }
 
-            // Esquiva de emergência se estiver prestes a ser atingido
+            // Esquiva de emergência se estiver próximo ao boss
             if (activeThreat.boss && Math.abs(this.x - activeThreat.boss.x) < 80 && this.dodgeCooldown <= 0) {
                 const dodgeDir = this.x > activeThreat.boss.x ? 1 : -1;
                 this.dodge(dodgeDir);
@@ -146,7 +144,6 @@ class Player {
                 this.vx = (diff > 0 ? 1 : -1) * (this.speed * 0.65);
                 this.facing = diff > 0 ? 1 : -1;
 
-                // Chance de pular ocasionalmente
                 if (this.isGrounded && Math.random() < 0.015) {
                     this.jump();
                 }
@@ -160,7 +157,6 @@ class Player {
     update(keys, shelterManager, activeThreat) {
         if (!this.alive) return;
 
-        // Atualiza contadores
         if (this.invulnerableTimer > 0) this.invulnerableTimer--;
         if (this.dodgeCooldown > 0) this.dodgeCooldown--;
         if (this.dodgeTimer > 0) {
@@ -187,21 +183,19 @@ class Player {
                 this.jump();
             }
 
-            // Esquiva / Dash (Shift ou tecla E)
+            // Esquiva / Dash
             if ((keys['ShiftLeft'] || keys['ShiftRight'] || keys['KeyE']) && this.dodgeCooldown <= 0) {
                 this.dodge(this.facing);
             }
         } else {
-            // IA do Bot
             this.updateAI(shelterManager, activeThreat);
             if (Math.abs(this.vx) > 0.5) this.animFrame += 0.18;
         }
 
-        // Aplica gravidade
+        // Gravidade
         this.vy += this.gravity;
         if (this.vy > 14) this.vy = 14;
 
-        // Atualiza posição preliminar
         this.x += this.vx;
         this.y += this.vy;
 
@@ -217,20 +211,17 @@ class Player {
             this.isGrounded = true;
         }
 
-        // Colisão com sólidos dos Abrigos (teto e paredes)
+        // Colisão com sólidos dos Abrigos
         const colliders = shelterManager.getSolidColliders();
         colliders.forEach(c => {
-            // Verifica sobreposição
             if (this.x + this.width > c.x && this.x < c.x + c.w &&
                 this.y + this.height > c.y && this.y < c.y + c.h) {
 
-                // Colisão de cima (pousar no teto da estrutura)
                 if (c.type === 'roof' && this.vy > 0 && this.y + this.height - this.vy <= c.y + 10) {
                     this.y = c.y - this.height;
                     this.vy = 0;
                     this.isGrounded = true;
                 }
-                // Colisão lateral com barreiras ou paredes do bunker
                 else if (c.type === 'barrier' || c.type === 'wall' || c.type === 'pillar') {
                     if (this.vx > 0 && this.x + this.width - this.vx <= c.x + 8) {
                         this.x = c.x - this.width;
@@ -259,7 +250,6 @@ class Player {
     // Renderização visual do jogador
     render(ctx, activeThreatActive) {
         if (!this.alive) {
-            // Marcador de jogador eliminado
             ctx.save();
             ctx.fillStyle = '#64748b';
             ctx.font = '10px sans-serif';
@@ -274,12 +264,10 @@ class Player {
         const centerX = this.x + this.width / 2;
         const feetY = this.y + this.height;
 
-        // Efeito de invulnerabilidade / dano (piscar)
         if (this.invulnerableTimer > 0 && Math.floor(Date.now() / 60) % 2 === 0) {
             ctx.globalAlpha = 0.4;
         }
 
-        // Aura de Esquiva (Dash)
         if (this.isDodging) {
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
@@ -288,7 +276,6 @@ class Player {
             ctx.stroke();
         }
 
-        // Indicador de Proteção (Escudo Neon)
         if (this.isProtected) {
             ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
             ctx.beginPath();
@@ -299,20 +286,19 @@ class Player {
             ctx.stroke();
         }
 
-        // Desenho do Corpo do Jogador
-        // Pernas (com animação de caminhada)
+        // Pernas
         ctx.fillStyle = '#1e293b';
         const legOffset = Math.sin(this.animFrame) * 5;
         ctx.fillRect(centerX - 8, feetY - 14, 6, 14 + (this.isGrounded ? legOffset : 0));
         ctx.fillRect(centerX + 2, feetY - 14, 6, 14 - (this.isGrounded ? legOffset : 0));
 
-        // Torso / Roupa
+        // Torso
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.roundRect(centerX - 9, this.y + 12, 18, 16, 4);
         ctx.fill();
 
-        // Cinto / Detalhe tático
+        // Cinto
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(centerX - 9, this.y + 24, 18, 4);
 
@@ -322,12 +308,12 @@ class Player {
         ctx.arc(centerX, this.y + 8, 8, 0, Math.PI * 2);
         ctx.fill();
 
-        // Olhos / Visor com direção
+        // Olhos
         ctx.fillStyle = this.isHuman ? '#0284c7' : '#ef4444';
         const eyeOffset = this.facing * 3;
         ctx.fillRect(centerX + eyeOffset - 2, this.y + 6, 4, 3);
 
-        // Capacete / Cabelo
+        // Cabelo / Capacete
         ctx.fillStyle = this.isHuman ? '#1e3a8a' : '#334155';
         ctx.beginPath();
         ctx.arc(centerX, this.y + 5, 8, Math.PI, 2 * Math.PI);
@@ -340,21 +326,17 @@ class Player {
         const barX = centerX - barW / 2;
         const barY = this.y - 18;
 
-        // Fundo da barra
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
 
-        // Barra de Vida colorida
         ctx.fillStyle = hpPercent > 0.5 ? '#22c55e' : (hpPercent > 0.25 ? '#eab308' : '#ef4444');
         ctx.fillRect(barX, barY, barW * hpPercent, barH);
 
-        // Nome do Jogador
         ctx.font = this.isHuman ? 'bold 11px sans-serif' : '10px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillStyle = this.isHuman ? '#38bdf8' : '#e2e8f0';
         ctx.fillText(this.name, centerX, barY - 4);
 
-        // Indicador de Perigo/Proteção
         if (activeThreatActive) {
             ctx.font = 'bold 9px sans-serif';
             if (this.isProtected) {

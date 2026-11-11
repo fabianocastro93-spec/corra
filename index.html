@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Arena Sobrevivência 2D - O Escolhido</title>
-    <link rel="stylesheet" href="style.css?v=1.2.0">
+    <link rel="stylesheet" href="style.css?v=2.0.0">
 </head>
 <body>
 
@@ -17,7 +17,7 @@
             <div class="brand-icon">⚡</div>
             <div>
                 <h1>ARENA 2D: O ESCOLHIDO</h1>
-                <p>Sobreviva a desastres, proteja-se nos abrigos e invoque seus poderes!</p>
+                <p>Sobreviva aos desastres, abrigue-se nos bunkers e invoque qualquer coisa!</p>
             </div>
         </div>
 
@@ -44,85 +44,100 @@
     <!-- PALCO PRINCIPAL DO JOGO -->
     <main class="main-stage">
         
-        <!-- WRAPPER DO CANVAS E MODAIS -->
-        <div class="canvas-wrapper">
-            <!-- Canvas Nativo em Alta Resolução -->
-            <canvas id="gameCanvas" width="1200" height="650"></canvas>
+        <!-- COLUNA DA ESQUERDA: CANVAS LIMPO + PAINEL DE CONTROLES ABAIXO (SEM FICAR EM CIMA DO JOGO) -->
+        <div class="game-column">
+            
+            <!-- ÁREA DO CANVAS (100% LIMPA, SEM NENHUM BOTÃO OBSTRUINDO A VISÃO DO JOGO) -->
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="1200" height="650"></canvas>
 
-            <!-- MODAL 1: ROLETA DE SORTEIO -->
-            <div id="raffleModal" class="modal-overlay hidden">
-                <div class="modal-content gold">
-                    <h2 class="modal-title">🎲 SORTEANDO O ESCOLHIDO...</h2>
-                    <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena?</p>
-                    <div id="raffleCandidate" class="roulette-box">...</div>
+                <!-- MODAL 1: ROLETA DE SORTEIO -->
+                <div id="raffleModal" class="modal-overlay hidden">
+                    <div class="modal-content gold">
+                        <h2 class="modal-title">🎲 SORTEANDO O ESCOLHIDO...</h2>
+                        <p class="modal-subtitle">Quem terá o poder supremo de materializar qualquer coisa na arena?</p>
+                        <div id="raffleCandidate" class="roulette-box">...</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- MODAL 2: CAIXA DE DIGITAÇÃO DO ESCOLHIDO -->
-            <div id="inputModal" class="modal-overlay hidden">
-                <div class="modal-content gold">
-                    <h2 class="modal-title" style="color: #facc15;">🎉 VOCÊ FOI O ESCOLHIDO!</h2>
-                    <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena e atacar todos os jogadores:</p>
-                    
-                    <div class="input-group">
-                        <div class="input-box-wrapper">
-                            <input type="text" id="invocationInput" class="invocation-input" placeholder="Ex: Goku, Chuva de Fogo, Tsunami, Godzilla..." maxlength="40" autocomplete="off">
-                            <div id="inputCountdown" class="input-countdown">15s</div>
+                <!-- MODAL 2: CAIXA DE DIGITAÇÃO DO ESCOLHIDO -->
+                <div id="inputModal" class="modal-overlay hidden">
+                    <div class="modal-content gold">
+                        <h2 class="modal-title" style="color: #facc15;">🎉 VOCÊ FOI O ESCOLHIDO!</h2>
+                        <p class="modal-subtitle">Escreva qualquer coisa para materializar na arena e atacar todos os jogadores:</p>
+                        
+                        <div class="input-group">
+                            <div class="input-box-wrapper">
+                                <input type="text" id="invocationInput" class="invocation-input" placeholder="Ex: Goku, Chuva de Fogo, Tsunami, Godzilla..." maxlength="40" autocomplete="off">
+                                <div id="inputCountdown" class="input-countdown">15s</div>
+                            </div>
                         </div>
+
+                        <!-- Botões de Atalho Rápido -->
+                        <div class="quick-tags">
+                            <button class="tag-btn" onclick="setQuickInput('Goku')">⚡ Goku</button>
+                            <button class="tag-btn" onclick="setQuickInput('Chuva de Fogo')">🔥 Chuva de Fogo</button>
+                            <button class="tag-btn" onclick="setQuickInput('Tsunami')">🌊 Tsunami</button>
+                            <button class="tag-btn" onclick="setQuickInput('Godzilla')">🦖 Godzilla</button>
+                            <button class="tag-btn" onclick="setQuickInput('Tornado')">🌪️ Tornado</button>
+                            <button class="tag-btn" onclick="setQuickInput('Tempestade de Raios')">⚡ Raios</button>
+                            <button class="tag-btn" onclick="setQuickInput('Nave Alienígena')">🛸 Alien</button>
+                            <button class="tag-btn" onclick="setQuickInput('Bomba Nuclear')">☢️ Bomba Nuclear</button>
+                            <button class="tag-btn" onclick="setQuickInput('Cadeira Voadora')">🪑 Cadeira Voadora</button>
+                            <button class="tag-btn" onclick="setQuickInput('Shrek Gigante')">👹 Shrek</button>
+                        </div>
+
+                        <button id="submitSummonBtn" class="btn-summon" onclick="handleManualSubmit()">
+                            🔥 MATERIALIZAR NA ARENA!
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Botões de Atalho Rápido -->
-                    <div class="quick-tags">
-                        <button class="tag-btn" onclick="setQuickInput('Goku')">⚡ Goku</button>
-                        <button class="tag-btn" onclick="setQuickInput('Chuva de Fogo')">🔥 Chuva de Fogo</button>
-                        <button class="tag-btn" onclick="setQuickInput('Tsunami')">🌊 Tsunami</button>
-                        <button class="tag-btn" onclick="setQuickInput('Godzilla')">🦖 Godzilla</button>
-                        <button class="tag-btn" onclick="setQuickInput('Tornado')">🌪️ Tornado</button>
-                        <button class="tag-btn" onclick="setQuickInput('Tempestade de Raios')">⚡ Raios</button>
-                        <button class="tag-btn" onclick="setQuickInput('Nave Alienígena')">🛸 Alien</button>
-                        <button class="tag-btn" onclick="setQuickInput('Bomba Nuclear')">☢️ Bomba Nuclear</button>
-                        <button class="tag-btn" onclick="setQuickInput('Cadeira Voadora')">🪑 Cadeira Voadora</button>
-                        <button class="tag-btn" onclick="setQuickInput('Shrek Gigante')">👹 Shrek</button>
+                <!-- MODAL 3: VITÓRIA OU DERROTA -->
+                <div id="gameOverModal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <h2 id="gameOverTitle" class="modal-title">FIM DE JOGO</h2>
+                        <p id="gameOverDesc" class="modal-subtitle">Resultado da partida.</p>
+                        <button class="btn-summon" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="if(window.game) window.game.restartGame()">
+                            🔄 JOGAR NOVAMENTE
+                        </button>
                     </div>
+                </div>
+            </div>
 
-                    <button id="submitSummonBtn" class="btn-summon" onclick="handleManualSubmit()">
-                        🔥 MATERIALIZAR NA ARENA!
+            <!-- PAINEL DE CONTROLE DEDICADO (ABAIXO DA TELA, NUNCA EM CIMA DO JOGO) -->
+            <div id="controllerBar" class="controller-bar">
+                <!-- Direcionais da Esquerda -->
+                <div class="ctrl-group ctrl-direction">
+                    <button id="btnTouchLeft" class="ctrl-btn" aria-label="Mover Esquerda">
+                        <span class="ctrl-arrow">◀</span>
+                        <span class="ctrl-text">ESQUERDA</span>
+                    </button>
+                    <button id="btnTouchRight" class="ctrl-btn" aria-label="Mover Direita">
+                        <span class="ctrl-arrow">▶</span>
+                        <span class="ctrl-text">DIREITA</span>
+                    </button>
+                </div>
+
+                <!-- Indicador Central -->
+                <div class="ctrl-center-info">
+                    <div class="ctrl-status-badge">🎮 CONTROLES ATIVOS</div>
+                    <small>Toque na tela ou use WASD / Setas</small>
+                </div>
+
+                <!-- Botões de Ação da Direita -->
+                <div class="ctrl-group ctrl-action">
+                    <button id="btnTouchDash" class="ctrl-btn ctrl-btn-dash" aria-label="Esquiva">
+                        <span class="ctrl-icon">⚡</span>
+                        <span class="ctrl-text">DASH</span>
+                    </button>
+                    <button id="btnTouchJump" class="ctrl-btn ctrl-btn-jump" aria-label="Pular">
+                        <span class="ctrl-icon">▲</span>
+                        <span class="ctrl-text">PULO</span>
                     </button>
                 </div>
             </div>
 
-            <!-- MODAL 3: VITÓRIA OU DERROTA -->
-            <div id="gameOverModal" class="modal-overlay hidden">
-                <div class="modal-content">
-                    <h2 id="gameOverTitle" class="modal-title">FIM DE JOGO</h2>
-                    <p id="gameOverDesc" class="modal-subtitle">Resultado da partida.</p>
-                    <button class="btn-summon" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="if(window.game) window.game.restartGame()">
-                        🔄 JOGAR NOVAMENTE
-                    </button>
-                </div>
-            </div>
-
-            <!-- CONTROLES VIRTUAIS TOUCH PARA CELULAR -->
-            <div id="touchGamepad" class="touch-gamepad">
-                <div class="touch-dpad">
-                    <button id="btnTouchLeft" class="touch-btn" aria-label="Mover Esquerda">
-                        <span>◀</span>
-                    </button>
-                    <button id="btnTouchRight" class="touch-btn" aria-label="Mover Direita">
-                        <span>▶</span>
-                    </button>
-                </div>
-                <div class="touch-actions">
-                    <button id="btnTouchDash" class="touch-btn touch-btn-dash" aria-label="Esquiva">
-                        <span>⚡</span>
-                        <small>DASH</small>
-                    </button>
-                    <button id="btnTouchJump" class="touch-btn touch-btn-jump" aria-label="Pular">
-                        <span>▲</span>
-                        <small>PULO</small>
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- PAINEL LATERAL (SOBREVIVENTES E REGRAS) -->
@@ -176,21 +191,19 @@
     </main>
 
     <!-- SCRIPTS MODULARES (COM CONTROLE DE ATUALIZAÇÃO AUTOMÁTICA) -->
-    <script src="audio.js?v=1.2.0"></script>
-    <script src="shelters.js?v=1.2.0"></script>
-    <script src="entities.js?v=1.2.0"></script>
-    <script src="invocations.js?v=1.2.0"></script>
-    <script src="game.js?v=1.2.0"></script>
+    <script src="audio.js?v=2.0.0"></script>
+    <script src="shelters.js?v=2.0.0"></script>
+    <script src="entities.js?v=2.0.0"></script>
+    <script src="invocations.js?v=2.0.0"></script>
+    <script src="game.js?v=2.0.0"></script>
 
     <script>
-        // Função para preencher sugestão rápida
         function setQuickInput(val) {
             const input = document.getElementById('invocationInput');
             input.value = val;
             input.focus();
         }
 
-        // Envio manual pelo botão
         function handleManualSubmit() {
             const input = document.getElementById('invocationInput');
             if (window.game) {
@@ -198,7 +211,6 @@
             }
         }
 
-        // Suporte para tecla ENTER no campo de digitação
         document.getElementById('invocationInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -206,7 +218,6 @@
             }
         });
 
-        // Alternar áudio
         function toggleAudio() {
             if (typeof sounds !== 'undefined') {
                 sounds.enabled = !sounds.enabled;
@@ -215,14 +226,13 @@
             }
         }
 
-        // ================= CONFIGURAÇÃO DO GAMEPAD TOUCH (MOBILE) =================
+        // ================= CONFIGURAÇÃO DO CONTROLE EXTERNO =================
         function setupTouchControls() {
             const btnLeft = document.getElementById('btnTouchLeft');
             const btnRight = document.getElementById('btnTouchRight');
             const btnJump = document.getElementById('btnTouchJump');
             const btnDash = document.getElementById('btnTouchDash');
 
-            // Desbloqueia contexto de áudio no primeiro toque na tela (iOS/Android)
             window.addEventListener('touchstart', () => {
                 if (typeof sounds !== 'undefined') sounds.ensureContext();
             }, { passive: true, once: true });
@@ -249,7 +259,6 @@
                     if (onUp) onUp();
                 }, { passive: false });
 
-                // Suporte para testar com clique do mouse também
                 element.addEventListener('mousedown', (e) => {
                     e.preventDefault();
                     element.classList.add('active');
@@ -266,28 +275,24 @@
                 });
             }
 
-            // Movimento para Esquerda
             bindButton(btnLeft, () => {
                 if (window.game) window.game.keys['ArrowLeft'] = true;
             }, () => {
                 if (window.game) window.game.keys['ArrowLeft'] = false;
             });
 
-            // Movimento para Direita
             bindButton(btnRight, () => {
                 if (window.game) window.game.keys['ArrowRight'] = true;
             }, () => {
                 if (window.game) window.game.keys['ArrowRight'] = false;
             });
 
-            // Pulo
             bindButton(btnJump, () => {
                 if (window.game && window.game.humanPlayer) {
                     window.game.humanPlayer.jump();
                 }
             }, null);
 
-            // Esquiva / Dash
             bindButton(btnDash, () => {
                 if (window.game && window.game.humanPlayer) {
                     window.game.humanPlayer.dodge(window.game.humanPlayer.facing);

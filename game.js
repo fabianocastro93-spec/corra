@@ -20,7 +20,7 @@ class Game {
         this.initPlayers();
 
         // Sistema de Sorteio (60 segundos)
-        this.raffleInterval = 60; // 1 minuto
+        this.raffleInterval = 60;
         this.raffleTimer = this.raffleInterval;
         this.isRaffling = false;
         this.isInputModalOpen = false;
@@ -53,7 +53,6 @@ class Game {
     // Configuração dos controles de teclado
     setupInput() {
         window.addEventListener('keydown', (e) => {
-            // Evita interceptar teclas se o modal de texto estiver aberto
             if (this.isInputModalOpen) return;
 
             this.keys[e.code] = true;
@@ -105,7 +104,7 @@ class Game {
         modal.classList.remove('hidden');
 
         let ticks = 0;
-        const maxTicks = 24; // 24 giros da roleta
+        const maxTicks = 24;
         let currentIdx = 0;
 
         const interval = setInterval(() => {
@@ -154,7 +153,6 @@ class Game {
         inputField.value = '';
         inputField.focus();
 
-        // Temporizador de 15 segundos para digitar
         let timeRemaining = 15;
         const timerEl = document.getElementById('inputCountdown');
         timerEl.textContent = `${timeRemaining}s`;
@@ -237,7 +235,8 @@ class Game {
         });
 
         const aliveCount = this.players.filter(p => p.alive).length;
-        document.getElementById('aliveCount').textContent = aliveCount;
+        const countEl = document.getElementById('aliveCount');
+        if (countEl) countEl.textContent = aliveCount;
     }
 
     // Reiniciar partida
@@ -255,10 +254,7 @@ class Game {
         const dt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        // Atualização da lógica
         this.update();
-
-        // Renderização
         this.render();
 
         requestAnimationFrame((t) => this.loop(t));
@@ -266,28 +262,23 @@ class Game {
 
     // Atualização de física e entidades
     update() {
-        // Reduz o tremor de tela
         if (this.shakeIntensity > 0) {
             this.shakeIntensity *= 0.9;
             if (this.shakeIntensity < 0.2) this.shakeIntensity = 0;
         }
 
-        // Atualiza os jogadores
         this.players.forEach(p => {
             p.update(this.keys, this.shelters, this.threatManager.activeThreat);
         });
 
-        // Atualiza a ameaça ativa
         this.threatManager.update(
             this.players,
             this.shelters,
             (intensity) => this.shake(intensity)
         );
 
-        // Atualiza HUD de sobreviventes
         this.updateSurvivorUI();
 
-        // Verifica Game Over se o jogador humano morrer ou todos morrerem
         if (!this.humanPlayer.alive && !document.getElementById('gameOverModal').classList.contains('active')) {
             const modal = document.getElementById('gameOverModal');
             document.getElementById('gameOverTitle').textContent = "VOCÊ FOI ELIMINADO!";
@@ -310,7 +301,6 @@ class Game {
     render() {
         this.ctx.save();
 
-        // Aplica o tremor de tela (Screen Shake)
         if (this.shakeIntensity > 0) {
             const dx = (Math.random() - 0.5) * this.shakeIntensity * 2;
             const dy = (Math.random() - 0.5) * this.shakeIntensity * 2;
@@ -333,10 +323,10 @@ class Game {
         this.ctx.fillStyle = skyGrad;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Grid futurista e montanhas distantes de fundo
+        // Grid futurista no horizonte
         this.renderBackgroundGrid();
 
-        // 2. Chão Plano Metálico / Concreto Reforçado
+        // 2. Chão Plano Metálico
         this.renderFlatGround();
 
         // 3. Abrigos, Bunkers e Barreiras
@@ -354,12 +344,10 @@ class Game {
         this.ctx.restore();
     }
 
-    // Desenha grid futurista no horizonte
     renderBackgroundGrid() {
         this.ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
         this.ctx.lineWidth = 1;
 
-        // Linhas verticais convergentes
         for (let x = 0; x <= this.canvas.width; x += 60) {
             this.ctx.beginPath();
             this.ctx.moveTo(x, 180);
@@ -367,7 +355,6 @@ class Game {
             this.ctx.stroke();
         }
 
-        // Linhas horizontais com perspectiva
         for (let y = 180; y <= this.groundY; y += 35) {
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
@@ -376,16 +363,13 @@ class Game {
         }
     }
 
-    // Desenha o piso da arena perfeitamente plano com placas de titânio
     renderFlatGround() {
         const gY = this.groundY;
         const gH = this.canvas.height - gY;
 
-        // Placas de superfície
         this.ctx.fillStyle = '#0f172a';
         this.ctx.fillRect(0, gY, this.canvas.width, gH);
 
-        // Linha de luz neon da superfície
         this.ctx.strokeStyle = '#0284c7';
         this.ctx.lineWidth = 3;
         this.ctx.beginPath();
@@ -393,13 +377,11 @@ class Game {
         this.ctx.lineTo(this.canvas.width, gY);
         this.ctx.stroke();
 
-        // Faixas de segurança amarelas/pretas nas bordas do chão
         this.ctx.fillStyle = '#eab308';
         for (let x = 0; x < this.canvas.width; x += 40) {
             this.ctx.fillRect(x, gY + 4, 20, 4);
         }
 
-        // Detalhes de placas de piso
         this.ctx.strokeStyle = '#1e293b';
         this.ctx.lineWidth = 1.5;
         for (let x = 0; x < this.canvas.width; x += 100) {
@@ -411,7 +393,6 @@ class Game {
     }
 }
 
-// Inicializa quando a página carregar
 window.addEventListener('DOMContentLoaded', () => {
     window.game = new Game();
 });

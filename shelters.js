@@ -101,7 +101,7 @@ class ShelterManager {
         return colliders;
     }
 
-    // Verifica se o ponto (px, py) está no topo do teto de um abrigo (para destruir projéteis aéreos)
+    // Verifica se o ponto (px, py) atinge o topo do teto de um abrigo (para destruir projéteis)
     hitsRoof(px, py) {
         for (const s of this.structures) {
             if (s.type === 'bunker' || s.type === 'pavilion') {
@@ -117,7 +117,6 @@ class ShelterManager {
     isProtectedFromAbove(px, py) {
         for (const s of this.structures) {
             if (s.type === 'bunker' || s.type === 'pavilion') {
-                // Se está abaixo do teto e dentro dos limites horizontais
                 if (px >= s.x && px <= s.x + s.w && py >= s.y + s.roofThickness - 5 && py <= s.y + s.h + 20) {
                     return true;
                 }
@@ -128,8 +127,6 @@ class ShelterManager {
 
     // Verifica se o ponto (px, py) está protegido contra um ataque que vem da direção X (threatX)
     isProtectedFromSide(px, py, threatX) {
-        // Se a ameaça vem da esquerda, precisa haver uma barreira ou parede entre threatX e px
-        // Se a ameaça vem da direita, idem
         const minX = Math.min(px, threatX);
         const maxX = Math.max(px, threatX);
 
@@ -139,11 +136,9 @@ class ShelterManager {
                     return true;
                 }
             } else if (s.type === 'bunker') {
-                // Se estiver dentro do bunker, está protegido lateralmente
                 if (px >= s.x + s.wallThickness && px <= s.x + s.w - s.wallThickness && py >= s.y + s.roofThickness) {
                     return true;
                 }
-                // Ou se o bunker inteiro está entre a ameaça e o jogador
                 if (s.x > minX && s.x + s.w < maxX) {
                     return true;
                 }
@@ -174,7 +169,7 @@ class ShelterManager {
             let targetX = s.x + s.w / 2;
             let dist = Math.abs(px - targetX);
             if (preferRoof && (s.type === 'bunker' || s.type === 'pavilion')) {
-                dist -= 80; // Prioriza abrigos com teto
+                dist -= 80;
             }
             if (dist < bestDist) {
                 bestDist = dist;
@@ -190,16 +185,13 @@ class ShelterManager {
 
         this.structures.forEach(s => {
             if (s.type === 'barrier') {
-                // Desenha Barreira Vertical Blindada
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(s.x, s.y, s.w, s.h);
 
-                // Listras de perigo/alerta
                 ctx.fillStyle = s.accentColor;
                 ctx.fillRect(s.x, s.y, s.w, 8);
                 ctx.fillRect(s.x, s.y + s.h - 8, s.w, 8);
 
-                // Nervuras metálicas reforçadas
                 ctx.strokeStyle = '#475569';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(s.x, s.y, s.w, s.h);
@@ -210,24 +202,20 @@ class ShelterManager {
                     ctx.lineTo(s.x + s.w - 4, yy);
                     ctx.stroke();
 
-                    // Rebites metálicos
                     ctx.fillStyle = '#94a3b8';
                     ctx.fillRect(s.x + 4, yy - 2, 4, 4);
                     ctx.fillRect(s.x + s.w - 8, yy - 2, 4, 4);
                 }
 
-                // Placa indicativa
                 ctx.fillStyle = '#f59e0b';
                 ctx.font = 'bold 9px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText("BARREIRA", s.x + s.w / 2, s.y - 6);
 
             } else if (s.type === 'bunker') {
-                // Fundo interno do bunker (área escura de proteção)
                 ctx.fillStyle = '#0f172a';
                 ctx.fillRect(s.x + s.wallThickness, s.y + s.roofThickness, s.w - s.wallThickness * 2, s.h - s.roofThickness);
 
-                // Grade/marcação de segurança interior
                 ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
                 ctx.lineWidth = 1;
                 for (let xx = s.x + s.wallThickness + 15; xx < s.x + s.w - s.wallThickness; xx += 20) {
@@ -237,21 +225,16 @@ class ShelterManager {
                     ctx.stroke();
                 }
 
-                // Luz neon verde no teto do interior (status: seguro)
                 ctx.fillStyle = '#10b981';
                 ctx.shadowColor = '#10b981';
                 ctx.shadowBlur = 8;
                 ctx.fillRect(s.x + s.w / 2 - 25, s.y + s.roofThickness + 4, 50, 4);
                 ctx.shadowBlur = 0;
 
-                // Parede esquerda
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(s.x, s.y + s.roofThickness, s.wallThickness, s.h - s.roofThickness);
-
-                // Parede direita
                 ctx.fillRect(s.x + s.w - s.wallThickness, s.y + s.roofThickness, s.wallThickness, s.h - s.roofThickness);
 
-                // Teto reforçado superior com armadura chanfrada
                 ctx.fillStyle = '#334155';
                 ctx.beginPath();
                 ctx.moveTo(s.x - 6, s.y + s.roofThickness);
@@ -261,34 +244,28 @@ class ShelterManager {
                 ctx.closePath();
                 ctx.fill();
 
-                // Placa e bordas do teto
                 ctx.strokeStyle = s.accentColor;
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
-                // Texto iluminado no topo
                 ctx.fillStyle = s.accentColor;
                 ctx.font = 'bold 11px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(`🛡️ ${s.name.toUpperCase()} (TETO BLINDADO)`, s.x + s.w / 2, s.y - 8);
 
             } else if (s.type === 'pavilion') {
-                // Cúpula central
                 ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
                 ctx.fillRect(s.x + s.pillarW, s.y + s.roofThickness, s.w - s.pillarW * 2, s.h - s.roofThickness);
 
-                // Pilares metálicos
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(s.x, s.y + s.roofThickness, s.pillarW, s.h - s.roofThickness);
                 ctx.fillRect(s.x + s.w - s.pillarW, s.y + s.roofThickness, s.pillarW, s.h - s.roofThickness);
 
-                // Teto arqueado futurista
                 ctx.fillStyle = '#334155';
                 ctx.beginPath();
                 ctx.arc(s.x + s.w / 2, s.y + s.roofThickness + 30, s.w / 2, Math.PI, 2 * Math.PI, false);
                 ctx.fill();
 
-                // Borda brilhante da cúpula
                 ctx.strokeStyle = '#10b981';
                 ctx.lineWidth = 3;
                 ctx.stroke();

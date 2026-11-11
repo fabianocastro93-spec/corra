@@ -12,9 +12,9 @@ Um jogo de sobrevivência 2D em uma arena plana com barreiras e abrigos defensiv
 ## 🎮 Mecânicas do Jogo
 
 - **Arena Plana e Abrigos**:
-  - **Bunkers Alpha e Ômega (com Teto Blindado)**: Oferecem proteção 100% contra catástrofes aéreas (chuva de fogo, meteoros, relâmpagos e ataques orbitais).
-  - **Barreiras Verticais**: Bloqueiam ataques horizontais, como a força das águas do **Tsunami** e o raio devastador do **Kamehameha**.
-  - **Cúpula Central**: Abrigo com cobertura reforçada e pilares metálicos.
+  - **Bunkers Alpha e Ômega (com Teto Blindado)**: Proteção 100% contra catástrofes aéreas (chuva de fogo, meteoros, relâmpagos e ataques orbitais).
+  - **Barreiras Verticais Anti-Impacto**: Bloqueiam ataques horizontais, como a força das águas do **Tsunami** e o feixe frontal do **Kamehameha**.
+  - **Cúpula Central**: Abrigo com cobertura arqueada e pilares metálicos.
 - **Sorteio do Escolhido (A cada 60 segundos)**:
   - Uma roleta animada escolhe um jogador vivo.
   - Se for você, abre-se uma tela interativa para você digitar o que deseja invocar na arena!
@@ -28,17 +28,19 @@ Um jogo de sobrevivência 2D em uma arena plana com barreiras e abrigos defensiv
   - **Gerador Procedural Universal**: Digite *qualquer palavra* (ex: `cadeira voadora`, `shrek`, `batata`) e um monstro exclusivo é gerado com base no texto, com projéteis temáticos e o nome em neon atacando todos!
 - **Áudio Procedural Nativo**:
   - Efeitos sonoros gerados diretamente pela **Web Audio API** (sem arquivos externos ou dependências de carregamento).
+- **Interface Limpa e Controles Dedicados**:
+  - A tela do jogo é 100% limpa, sem botões cobrindo os personagens.
+  - Painel de controle dedicado posicionado abaixo do jogo, ideal tanto para toques no celular quanto para cliques no computador.
 
 ---
 
 ## 🕹️ Controles
- 
-### 📱 No Celular / Dispositivos Móveis
-- **Botões `◀` e `▶` (Canto inferior esquerdo)**: Movimentar o personagem.
-- **Botão `▲ PULO` (Canto inferior direito, verde)**: Pular para alcançar abrigos ou esquivar de tremores.
-- **Botão `⚡ DASH` (Canto inferior direito, dourado)**: Esquiva rápida com invulnerabilidade momentânea.
-- **Toque na Tela**: Desbloqueia o som nativo no primeiro toque e permite digitar com o teclado virtual.
-- **Multi-Touch Completo**: Você pode segurar para correr e apertar o pulo ao mesmo tempo com os dois polegares!
+
+### 📱 No Celular / Dispositivos Móveis (Barra de Controles Abaixo do Jogo)
+- **Botões `◀ ESQUERDA` e `DIREITA ▶`**: Movimentar o personagem.
+- **Botão `▲ PULO` (Verde)**: Pular para alcançar abrigos ou esquivar de tremores.
+- **Botão `⚡ DASH` (Dourado)**: Esquiva rápida com invulnerabilidade temporária.
+- **Multi-Touch Completo**: Você pode segurar para andar e apertar o pulo ao mesmo tempo com os dois polegares!
 
 ### 💻 No Computador
 | Ação | Teclas |
@@ -72,8 +74,8 @@ O projeto está configurado com **GitHub Actions** para **CI/CD contínuo**. Tod
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml # Workflow de atualização automática no GitHub Pages
-├── index.html        # Estrutura visual, canvas, HUD e modais interativos
-├── style.css         # Estilização arcade sci-fi, glassmorphism e animações
+├── index.html        # Estrutura visual, canvas limpo, controles e modais
+├── style.css         # Estilização arcade, layout desacoplado e animações
 ├── audio.js          # Sintetizador sonoro Web Audio API (100% autônomo)
 ├── shelters.js       # Gerenciador de barreiras, bunkers e verificação de proteção
 ├── entities.js       # Classes de Jogador (Humano e Bots com IA de fuga)
@@ -82,7 +84,3 @@ O projeto está configurado com **GitHub Actions** para **CI/CD contínuo**. Tod
 ├── .gitignore        # Arquivos ignorados pelo Git
 └── README.md         # Documentação do projeto
 ```
-
----
-
-Desenvolvido para máxima diversão e sobrevivência na arena! 🚀

@@ -49,14 +49,14 @@ class ThreatManager {
     // Invoca a ameaça escolhida
     invoke(rawText, playerName) {
         const info = this.parseInvocationText(rawText);
-        const durationSeconds = 18; // Cada ameaça dura 18 segundos
+        const durationSeconds = 18;
 
         this.activeThreat = {
             isActive: true,
             type: info.type,
             name: info.name,
             invokedBy: playerName,
-            duration: durationSeconds * 60, // em frames
+            duration: durationSeconds * 60,
             maxDuration: durationSeconds * 60,
             timer: 0,
             state: 'intro',
@@ -65,7 +65,6 @@ class ThreatManager {
 
         if (sounds) sounds.playAlert();
 
-        // Inicializa o chefe / entidade de acordo com o tipo
         if (info.type === 'goku') {
             this.initGoku();
         } else if (info.type === 'godzilla') {
@@ -91,9 +90,9 @@ class ThreatManager {
             vx: 0,
             vy: 0,
             facing: 1,
-            auraHue: 50, // Dourado
+            auraHue: 50,
             actionTimer: 0,
-            subState: 'hover', // 'hover', 'charging_kamehameha', 'firing_kamehameha', 'ki_barrage'
+            subState: 'hover',
             beamWidth: 0,
             beamY: 0,
             beamDir: 1
@@ -103,14 +102,14 @@ class ThreatManager {
     // Inicializa Boss Godzilla
     initGodzilla() {
         this.activeThreat.boss = {
-            x: -120, // Surge caminhando da esquerda
+            x: -120,
             y: this.groundY - 180,
             targetX: 80,
             width: 160,
             height: 180,
             facing: 1,
             actionTimer: 0,
-            subState: 'stomping', // 'stomping', 'atomic_breath'
+            subState: 'stomping',
             breathTimer: 0
         };
     }
@@ -139,7 +138,6 @@ class ThreatManager {
 
     // Inicializa Boss Procedural para QUALQUER palavra digitada
     initProceduralBoss(word) {
-        // Gera semente numérica a partir dos caracteres da palavra
         let hash = 0;
         for (let i = 0; i < word.length; i++) {
             hash = (hash << 5) - hash + word.charCodeAt(i);
@@ -147,7 +145,6 @@ class ThreatManager {
         }
         const absHash = Math.abs(hash);
 
-        // Seleciona cor da aura e ataque com base na palavra
         const hues = [0, 45, 120, 180, 270, 310];
         const auraHue = hues[absHash % hues.length];
         const patterns = ['barrage', 'slammer', 'lasers', 'meteorite'];
@@ -176,19 +173,16 @@ class ThreatManager {
         });
     }
 
-    // Adiciona projétil à arena
     addProjectile(p) {
         this.projectiles.push(p);
     }
 
-    // Adiciona partícula
     addParticle(p) {
         this.particles.push(p);
     }
 
     // Atualização principal da ameaça e ataques
     update(players, shelterManager, onScreenShake) {
-        // Atualiza anúncios visuais
         for (let i = this.announcements.length - 1; i >= 0; i--) {
             const a = this.announcements[i];
             a.y -= 0.3;
@@ -196,7 +190,6 @@ class ThreatManager {
             if (a.alpha <= 0) this.announcements.splice(i, 1);
         }
 
-        // Se não há ameaça ativa
         if (!this.activeThreat) return;
 
         const threat = this.activeThreat;
@@ -208,47 +201,27 @@ class ThreatManager {
             return;
         }
 
-        // ------------------ GOKU ------------------
         if (threat.type === 'goku') {
             this.updateGoku(threat, players, shelterManager, onScreenShake);
-        }
-        // ------------------ CHUVA DE FOGO / METEOROS ------------------
-        else if (threat.type === 'fire_rain') {
+        } else if (threat.type === 'fire_rain') {
             this.updateFireRain(players, shelterManager, onScreenShake);
-        }
-        // ------------------ TSUNAMI / ÁGUA ------------------
-        else if (threat.type === 'tsunami') {
+        } else if (threat.type === 'tsunami') {
             this.updateTsunami(threat, players, shelterManager, onScreenShake);
-        }
-        // ------------------ TORNADO / VENTO ------------------
-        else if (threat.type === 'tornado') {
+        } else if (threat.type === 'tornado') {
             this.updateTornado(threat, players, shelterManager);
-        }
-        // ------------------ GODZILLA ------------------
-        else if (threat.type === 'godzilla') {
+        } else if (threat.type === 'godzilla') {
             this.updateGodzilla(threat, players, shelterManager, onScreenShake);
-        }
-        // ------------------ RAIO / TEMPESTADE ELÉTRICA ------------------
-        else if (threat.type === 'lightning') {
+        } else if (threat.type === 'lightning') {
             this.updateLightning(players, shelterManager, onScreenShake);
-        }
-        // ------------------ ALIEN / OVNI ------------------
-        else if (threat.type === 'alien') {
+        } else if (threat.type === 'alien') {
             this.updateAlien(threat, players, shelterManager);
-        }
-        // ------------------ BOMBA NUCLEAR ------------------
-        else if (threat.type === 'nuke') {
+        } else if (threat.type === 'nuke') {
             this.updateNuke(threat, players, shelterManager, onScreenShake);
-        }
-        // ------------------ CHEFE PROCEDURAL UNIVERSAL ------------------
-        else if (threat.type === 'procedural') {
+        } else if (threat.type === 'procedural') {
             this.updateProceduralBoss(threat, players, shelterManager, onScreenShake);
         }
 
-        // Atualiza e colide projéteis
         this.updateProjectiles(players, shelterManager, onScreenShake);
-
-        // Atualiza partículas
         this.updateParticles();
     }
 
@@ -257,7 +230,6 @@ class ThreatManager {
         const b = threat.boss;
         b.actionTimer++;
 
-        // Cria faíscas douradas da aura Super Saiyajin
         for (let i = 0; i < 2; i++) {
             this.addParticle({
                 x: b.x + (Math.random() - 0.5) * 30,
@@ -271,15 +243,12 @@ class ThreatManager {
             });
         }
 
-        // Ciclo de combate do Goku
         if (b.subState === 'hover') {
-            // Voa suavemente rastreando o centro dos jogadores
             const living = players.filter(p => p.alive);
             const targetX = living.length > 0 ? living[0].x : 600;
             b.x += (targetX - b.x) * 0.04;
             b.y = 170 + Math.sin(Date.now() / 250) * 20;
 
-            // Dispara Esferas de Ki ocasionais
             if (b.actionTimer % 45 === 0) {
                 const target = living[Math.floor(Math.random() * living.length)];
                 if (target) {
@@ -298,11 +267,9 @@ class ThreatManager {
                 }
             }
 
-            // A cada 5 segundos prepara o Kamehameha
             if (b.actionTimer > 280) {
                 b.subState = 'charging_kamehameha';
                 b.actionTimer = 0;
-                // Teleporta para um canto da arena (esquerda ou direita)
                 b.x = Math.random() > 0.5 ? 90 : 1110;
                 b.y = this.groundY - 60;
                 b.facing = b.x < 600 ? 1 : -1;
@@ -314,7 +281,6 @@ class ThreatManager {
             }
 
         } else if (b.subState === 'charging_kamehameha') {
-            // Partículas azuis convergindo para as mãos de Goku
             for (let i = 0; i < 4; i++) {
                 const ang = Math.random() * Math.PI * 2;
                 const dist = 50 + Math.random() * 40;
@@ -330,7 +296,7 @@ class ThreatManager {
                 });
             }
 
-            if (b.actionTimer > 110) { // ~2 segundos de carregamento
+            if (b.actionTimer > 110) {
                 b.subState = 'firing_kamehameha';
                 b.actionTimer = 0;
                 this.addAnnouncement("GOKU: ...HAAAAAAAA!!!", '#0284c7');
@@ -338,7 +304,6 @@ class ThreatManager {
             }
 
         } else if (b.subState === 'firing_kamehameha') {
-            // Dispara o raio massivo de energia horizontal
             if (onScreenShake) onScreenShake(8);
 
             const beamHeight = 65;
@@ -346,7 +311,6 @@ class ThreatManager {
             const beamX = b.facing === 1 ? b.x : 0;
             const beamW = b.facing === 1 ? (1200 - b.x) : b.x;
 
-            // Partículas explosivas ao longo do raio
             for (let xx = beamX; xx < beamX + beamW; xx += 60) {
                 this.addParticle({
                     x: xx + (Math.random() - 0.5) * 30,
@@ -360,13 +324,11 @@ class ThreatManager {
                 });
             }
 
-            // Dano contínuo aos jogadores atingidos pelo Kamehameha (a menos que estejam abrigados atrás de barreiras sólidas)
             players.forEach(p => {
                 if (!p.alive) return;
                 if (p.y + p.height > beamY && p.y < beamY + beamHeight) {
                     const inBeamPath = b.facing === 1 ? p.x > b.x : p.x < b.x;
                     if (inBeamPath) {
-                        // Verifica se uma barreira ou bunker protege o jogador
                         const protectedByWall = shelterManager.isProtectedFromSide(p.x, p.y, b.x);
                         if (!protectedByWall) {
                             p.takeDamage(1.5, b.x, 'kamehameha');
@@ -375,7 +337,7 @@ class ThreatManager {
                 }
             });
 
-            if (b.actionTimer > 100) { // ~1.7s de raio
+            if (b.actionTimer > 100) {
                 b.subState = 'hover';
                 b.actionTimer = 0;
             }
@@ -384,7 +346,6 @@ class ThreatManager {
 
     // LÓGICA DA CHUVA DE FOGO E METEOROS
     updateFireRain(players, shelterManager, onScreenShake) {
-        // Gera novos meteoros caindo do céu
         if (Math.random() < 0.45) {
             this.addProjectile({
                 x: Math.random() * 1200,
@@ -398,7 +359,6 @@ class ThreatManager {
             });
         }
 
-        // Fumaça e brasas no ar
         this.addParticle({
             x: Math.random() * 1200,
             y: Math.random() * 550,
@@ -423,7 +383,6 @@ class ThreatManager {
 
         if (onScreenShake) onScreenShake(3);
 
-        // Gera espuma e respingos de água
         for (let i = 0; i < 5; i++) {
             this.addParticle({
                 x: wave.x + (Math.random() - 0.5) * 40,
@@ -437,11 +396,9 @@ class ThreatManager {
             });
         }
 
-        // Colide a onda com os jogadores
         players.forEach(p => {
             if (!p.alive) return;
             if (Math.abs(p.x - wave.x) < 45 && p.y + p.height > this.groundY - wave.height) {
-                // Se o jogador estiver protegido atrás de uma barreira ou dentro do bunker, a água não arrasta
                 const protectedByWall = shelterManager.isProtectedFromSide(p.x, p.y, wave.x - wave.vx * 20);
                 if (!protectedByWall) {
                     p.takeDamage(1.2, wave.x - 20, 'tsunami');
@@ -451,7 +408,6 @@ class ThreatManager {
             }
         });
 
-        // Reinicia a onda do outro lado se passar da tela
         if (wave.x > 1350) {
             wave.x = -150;
             if (sounds) sounds.playWaterSplash();
@@ -466,7 +422,6 @@ class ThreatManager {
         if (t.x < 80) { t.x = 80; t.dir = 1; }
         if (t.x > 1120) { t.x = 1120; t.dir = -1; }
 
-        // Poeira e vento rodopiante
         for (let i = 0; i < 4; i++) {
             const h = Math.random() * 260;
             const w = (h / 260) * t.radius;
@@ -483,7 +438,6 @@ class ThreatManager {
             });
         }
 
-        // Vórtice atrai e danifica jogadores que não estão em abrigos
         players.forEach(p => {
             if (!p.alive) return;
             const dist = p.x - t.x;
@@ -504,18 +458,15 @@ class ThreatManager {
         const gz = threat.boss;
         gz.actionTimer++;
 
-        // Avança até a borda esquerda da arena
         if (gz.x < gz.targetX) {
             gz.x += 1.5;
         }
 
-        // Pisões que causam terremoto a cada 3.5 segundos
         if (gz.actionTimer % 210 === 0) {
             if (onScreenShake) onScreenShake(12);
             if (sounds) sounds.playExplosion();
             this.addAnnouncement("🦖 GODZILLA PISOU COM FORÇA! TERREMOTO NO SOLO!", '#f97316');
 
-            // Causa dano a quem estiver no chão desprotegido (pular ou estar em teto/abrigo salva!)
             players.forEach(p => {
                 if (p.alive && p.isGrounded && !p.isProtected) {
                     p.takeDamage(25, gz.x, 'stomp');
@@ -524,9 +475,7 @@ class ThreatManager {
             });
         }
 
-        // Raio Atômico a cada 7 segundos
         if (gz.actionTimer % 420 > 300) {
-            // Carregando dorsal plates azuis
             for (let i = 0; i < 3; i++) {
                 this.addParticle({
                     x: gz.x + 30 + Math.random() * 20,
@@ -548,7 +497,6 @@ class ThreatManager {
             if (gz.actionTimer % 420 >= 360) {
                 if (onScreenShake) onScreenShake(6);
                 const beamY = this.groundY - 70;
-                // Raio atômico atravessa a tela
                 players.forEach(p => {
                     if (p.alive && p.y + p.height > beamY - 30 && p.y < beamY + 30) {
                         if (!shelterManager.isProtectedFromSide(p.x, p.y, gz.x)) {
@@ -560,15 +508,13 @@ class ThreatManager {
         }
     }
 
-    // LÓGICA DO RAIO / TEMPESTADE ELÉTRICA
+    // LÓGICA DO RAIO
     updateLightning(players, shelterManager, onScreenShake) {
         if (Math.random() < 0.08) {
             const strikeX = 40 + Math.random() * 1120;
-            // Cria relâmpago vertical do céu até o chão
             if (onScreenShake) onScreenShake(9);
             if (sounds) sounds.playExplosion();
 
-            // Partículas elétricas
             for (let yy = 0; yy < this.groundY; yy += 30) {
                 this.addParticle({
                     x: strikeX + (Math.random() - 0.5) * 20,
@@ -582,7 +528,6 @@ class ThreatManager {
                 });
             }
 
-            // Dano aos jogadores próximos ao raio que não estejam sob teto
             players.forEach(p => {
                 if (p.alive && Math.abs(p.x - strikeX) < 65) {
                     if (!shelterManager.isProtectedFromAbove(p.x, p.y)) {
@@ -593,7 +538,7 @@ class ThreatManager {
         }
     }
 
-    // LÓGICA DO ALIEN / OVNI
+    // LÓGICA DO ALIEN
     updateAlien(threat, players, shelterManager) {
         const ufo = threat.boss;
         ufo.x += ufo.dir * 3.5;
@@ -602,7 +547,6 @@ class ThreatManager {
 
         ufo.actionTimer++;
         if (ufo.actionTimer % 50 === 0) {
-            // Dispara laser de plasma para baixo
             this.addProjectile({
                 x: ufo.x,
                 y: ufo.y + 20,
@@ -628,7 +572,6 @@ class ThreatManager {
             if (sounds) sounds.playAlert();
         }
 
-        // No último segundo: MEGA EXPLOSÃO
         if (remainingFrames === 60) {
             if (onScreenShake) onScreenShake(25);
             if (sounds) sounds.playExplosion();
@@ -636,7 +579,6 @@ class ThreatManager {
 
             players.forEach(p => {
                 if (!p.alive) return;
-                // Apenas sobreviventes completamente dentro de bunkers resistem!
                 if (!shelterManager.isInsideBunker(p.x + p.width / 2, p.y + p.height / 2)) {
                     p.takeDamage(75, 600, 'nuke');
                 }
@@ -649,11 +591,9 @@ class ThreatManager {
         const b = threat.boss;
         b.actionTimer++;
 
-        // Movimento flutuante
         b.x += Math.sin(b.actionTimer / 30) * 4;
         b.y = 170 + Math.cos(b.actionTimer / 40) * 25;
 
-        // Partículas da palavra
         this.addParticle({
             x: b.x + (Math.random() - 0.5) * 50,
             y: b.y + (Math.random() - 0.5) * 50,
@@ -665,9 +605,7 @@ class ThreatManager {
             life: 20
         });
 
-        // Padrões de Ataque baseados no hash da palavra
         if (b.pattern === 'barrage' && b.actionTimer % 35 === 0) {
-            // Rajada de esferas
             for (let i = -1; i <= 1; i++) {
                 this.addProjectile({
                     x: b.x,
@@ -683,7 +621,6 @@ class ThreatManager {
             if (sounds) sounds.playJump();
 
         } else if (b.pattern === 'slammer' && b.actionTimer % 180 === 0) {
-            // Salto e esmagamento no chão
             this.addAnnouncement(`⚡ ${b.word.toUpperCase()} DESFERIU UM IMPACTO SÍSMICO!`, `hsl(${b.auraHue}, 100%, 70%)`);
             if (onScreenShake) onScreenShake(10);
             if (sounds) sounds.playExplosion();
@@ -696,7 +633,6 @@ class ThreatManager {
             });
 
         } else if (b.pattern === 'lasers' && b.actionTimer % 70 === 0) {
-            // Lasers teleguiados
             const living = players.filter(p => p.alive);
             const target = living[Math.floor(Math.random() * living.length)];
             if (target) {
@@ -715,7 +651,6 @@ class ThreatManager {
             }
 
         } else if (b.pattern === 'meteorite' && b.actionTimer % 40 === 0) {
-            // Chuva de fragmentos temáticos
             this.addProjectile({
                 x: Math.random() * 1200,
                 y: -10,
@@ -738,10 +673,9 @@ class ThreatManager {
 
             let destroyed = false;
 
-            // Colisão com teto dos abrigos (teto absorve ataques aéreos!)
+            // Colisão com teto dos abrigos
             if (p.vy > 0 && (shelterManager.hitsRoof(p.x, p.y) || shelterManager.isProtectedFromAbove(p.x, p.y))) {
                 destroyed = true;
-                // Explosão no teto
                 for (let k = 0; k < 6; k++) {
                     this.addParticle({
                         x: p.x,
@@ -779,14 +713,12 @@ class ThreatManager {
                     if (player.alive && Math.abs(player.x + player.width / 2 - p.x) < player.width / 2 + p.radius &&
                         Math.abs(player.y + player.height / 2 - p.y) < player.height / 2 + p.radius) {
                         
-                        // Se for ataque vindo de cima e o jogador estiver protegido sob teto/bunker, não toma dano!
                         const isAerial = p.vy > 1.5;
                         if (isAerial && shelterManager.isProtectedFromAbove(player.x + player.width / 2, player.y)) {
                             destroyed = true;
                             break;
                         }
 
-                        // Causa dano
                         player.takeDamage(p.damage, p.x, p.type);
                         destroyed = true;
                         break;
@@ -800,7 +732,6 @@ class ThreatManager {
         }
     }
 
-    // Atualiza partículas
     updateParticles() {
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const pt = this.particles[i];
@@ -813,11 +744,9 @@ class ThreatManager {
         }
     }
 
-    // RENDERIZAÇÃO VISUAL DA AMEAÇA ATIVA
     render(ctx) {
         ctx.save();
 
-        // 1. Projéteis
         this.projectiles.forEach(p => {
             ctx.fillStyle = p.color;
             ctx.shadowColor = p.color;
@@ -828,7 +757,6 @@ class ThreatManager {
             ctx.shadowBlur = 0;
         });
 
-        // 2. Partículas
         this.particles.forEach(pt => {
             ctx.fillStyle = pt.color;
             ctx.globalAlpha = Math.max(0, pt.alpha);
@@ -838,33 +766,22 @@ class ThreatManager {
         });
         ctx.globalAlpha = 1.0;
 
-        // Se houver ameaça ativa
         if (this.activeThreat) {
             const threat = this.activeThreat;
 
-            // Renderiza Goku
             if (threat.type === 'goku' && threat.boss) {
                 this.renderGoku(ctx, threat.boss);
-            }
-            // Renderiza Onda do Tsunami
-            else if (threat.type === 'tsunami' && threat.wave) {
+            } else if (threat.type === 'tsunami' && threat.wave) {
                 this.renderTsunami(ctx, threat.wave);
-            }
-            // Renderiza Godzilla
-            else if (threat.type === 'godzilla' && threat.boss) {
+            } else if (threat.type === 'godzilla' && threat.boss) {
                 this.renderGodzilla(ctx, threat.boss);
-            }
-            // Renderiza Chefe Procedural
-            else if (threat.type === 'procedural' && threat.boss) {
+            } else if (threat.type === 'procedural' && threat.boss) {
                 this.renderProceduralBoss(ctx, threat.boss);
-            }
-            // Renderiza Alien
-            else if (threat.type === 'alien' && threat.boss) {
+            } else if (threat.type === 'alien' && threat.boss) {
                 this.renderAlien(ctx, threat.boss);
             }
         }
 
-        // Renderiza Notificações e Anúncios Centrais
         this.announcements.forEach(a => {
             ctx.save();
             ctx.font = 'bold 22px sans-serif';
@@ -880,11 +797,9 @@ class ThreatManager {
         ctx.restore();
     }
 
-    // Desenha Goku
     renderGoku(ctx, b) {
         ctx.save();
 
-        // Aura Super Saiyajin pulsante
         const auraSize = 38 + Math.sin(Date.now() / 80) * 6;
         const grad = ctx.createRadialGradient(b.x, b.y, 10, b.x, b.y, auraSize);
         grad.addColorStop(0, 'rgba(255, 235, 59, 0.9)');
@@ -895,23 +810,19 @@ class ThreatManager {
         ctx.arc(b.x, b.y, auraSize, 0, Math.PI * 2);
         ctx.fill();
 
-        // Corpo e Gi Laranja/Azul
-        ctx.fillStyle = '#ea580c'; // Laranja Gi
+        ctx.fillStyle = '#ea580c';
         ctx.beginPath();
         ctx.roundRect(b.x - 12, b.y - 2, 24, 26, 4);
         ctx.fill();
 
-        // Faixa azul marinho
         ctx.fillStyle = '#1e3a8a';
         ctx.fillRect(b.x - 12, b.y + 12, 24, 5);
 
-        // Cabeça
         ctx.fillStyle = '#fed7aa';
         ctx.beginPath();
         ctx.arc(b.x, b.y - 12, 11, 0, Math.PI * 2);
         ctx.fill();
 
-        // Cabelo Espetado Dourado do Super Saiyajin
         ctx.fillStyle = '#fde047';
         ctx.beginPath();
         ctx.moveTo(b.x - 15, b.y - 14);
@@ -929,12 +840,10 @@ class ThreatManager {
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Olhos Verdes de Super Saiyajin
         ctx.fillStyle = '#22c55e';
         ctx.fillRect(b.x - 5, b.y - 14, 3, 3);
         ctx.fillRect(b.x + 2, b.y - 14, 3, 3);
 
-        // Tag de Nome
         ctx.fillStyle = '#fde047';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
@@ -942,24 +851,20 @@ class ThreatManager {
         ctx.shadowBlur = 4;
         ctx.fillText("⚡ GOKU (SUPER SAIYAJIN)", b.x, b.y - 44);
 
-        // Efeito de disparo do KAMEHAMEHA!
         if (b.subState === 'firing_kamehameha') {
             const beamHeight = 55;
             const beamY = b.y - beamHeight / 2;
             const beamX = b.facing === 1 ? b.x : 0;
             const beamW = b.facing === 1 ? (1200 - b.x) : b.x;
 
-            // Feixe azul externo
             ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
             ctx.shadowColor = '#0284c7';
             ctx.shadowBlur = 25;
             ctx.fillRect(beamX, beamY, beamW, beamHeight);
 
-            // Núcleo branco super concentrado
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(beamX, beamY + 12, beamW, beamHeight - 24);
 
-            // Esfera de disparo nas mãos de Goku
             ctx.beginPath();
             ctx.arc(b.x, b.y, 35, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff';
@@ -969,7 +874,6 @@ class ThreatManager {
         ctx.restore();
     }
 
-    // Desenha Tsunami
     renderTsunami(ctx, wave) {
         ctx.save();
         const grad = ctx.createLinearGradient(wave.x - 80, 0, wave.x + 40, 0);
@@ -992,11 +896,9 @@ class ThreatManager {
         ctx.restore();
     }
 
-    // Desenha Godzilla
     renderGodzilla(ctx, gz) {
         ctx.save();
         ctx.fillStyle = '#1e293b';
-        // Corpo Titânico
         ctx.beginPath();
         ctx.moveTo(gz.x, gz.y + gz.height);
         ctx.lineTo(gz.x + 20, gz.y + 40);
@@ -1006,7 +908,6 @@ class ThreatManager {
         ctx.closePath();
         ctx.fill();
 
-        // Placas dorsais brilhantes (azuis/roxas)
         ctx.fillStyle = '#8b5cf6';
         ctx.shadowColor = '#a855f7';
         ctx.shadowBlur = 15;
@@ -1018,13 +919,11 @@ class ThreatManager {
             ctx.fill();
         }
 
-        // Olho vermelho brilhante
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
         ctx.arc(gz.x + 100, gz.y + 25, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Nome
         ctx.fillStyle = '#a855f7';
         ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'center';
@@ -1032,16 +931,13 @@ class ThreatManager {
         ctx.restore();
     }
 
-    // Desenha Alien
     renderAlien(ctx, ufo) {
         ctx.save();
-        // Cúpula de vidro do OVNI
         ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
         ctx.beginPath();
         ctx.arc(ufo.x, ufo.y - 8, 20, Math.PI, 2 * Math.PI);
         ctx.fill();
 
-        // Disco metálico
         ctx.fillStyle = '#475569';
         ctx.beginPath();
         ctx.ellipse(ufo.x, ufo.y, 45, 14, 0, 0, Math.PI * 2);
@@ -1050,7 +946,6 @@ class ThreatManager {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Luzes piscantes
         const lightCols = ['#ef4444', '#facc15', '#10b981', '#38bdf8'];
         for (let i = -3; i <= 3; i++) {
             ctx.fillStyle = lightCols[(Math.abs(i) + Math.floor(Date.now() / 150)) % lightCols.length];
@@ -1066,12 +961,10 @@ class ThreatManager {
         ctx.restore();
     }
 
-    // Desenha Chefe Procedural Universal (QUALQUER PALAVRA DIGITADA!)
     renderProceduralBoss(ctx, b) {
         ctx.save();
         const hue = b.auraHue;
 
-        // Aura cósmica giratória
         const grad = ctx.createRadialGradient(b.x, b.y, 10, b.x, b.y, 50);
         grad.addColorStop(0, `hsla(${hue}, 100%, 70%, 0.8)`);
         grad.addColorStop(0.7, `hsla(${hue}, 90%, 50%, 0.3)`);
@@ -1081,10 +974,9 @@ class ThreatManager {
         ctx.arc(b.x, b.y, 50, 0, Math.PI * 2);
         ctx.fill();
 
-        // Corpo geométrico monstruoso
         ctx.fillStyle = `hsl(${hue}, 80%, 25%)`;
         ctx.beginPath();
-        const sides = 5 + (b.hash % 4); // 5 a 8 lados
+        const sides = 5 + (b.hash % 4);
         const radius = 28;
         for (let i = 0; i < sides; i++) {
             const angle = (i * 2 * Math.PI) / sides + Date.now() / 400;
@@ -1099,20 +991,17 @@ class ThreatManager {
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Núcleo brilhante
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(b.x, b.y, 10, 0, Math.PI * 2);
         ctx.fill();
 
-        // Olhos ameaçadores
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
         ctx.arc(b.x - 7, b.y - 3, 4, 0, Math.PI * 2);
         ctx.arc(b.x + 7, b.y - 3, 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Título estilizado exibindo a palavra exata que o jogador digitou!
         ctx.font = 'bold 15px sans-serif';
         ctx.fillStyle = `hsl(${hue}, 100%, 75%)`;
         ctx.textAlign = 'center';
